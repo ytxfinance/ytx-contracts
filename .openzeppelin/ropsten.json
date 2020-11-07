@@ -227,6 +227,136 @@
           }
         }
       }
+    },
+    "f7a15aca481d8946620d482447782f0f26878911ff509800f0d734532e96ce26": {
+      "address": "0x57c5664e19Af056997F376de9b5227068015579C",
+      "txHash": "0x3df2f69607d1ab72b1e3d2a35f1258d3024fbf40203a8ede1873043b0b492f19",
+      "layout": {
+        "storage": [
+          {
+            "contract": "Initializable",
+            "label": "initialized",
+            "type": "t_bool",
+            "src": "../@openzeppelin/contracts-ethereum-package/contracts/Initializable.sol:21"
+          },
+          {
+            "contract": "Initializable",
+            "label": "initializing",
+            "type": "t_bool",
+            "src": "../@openzeppelin/contracts-ethereum-package/contracts/Initializable.sol:26"
+          },
+          {
+            "contract": "Initializable",
+            "label": "______gap",
+            "type": "t_array(t_uint256)50_storage",
+            "src": "../@openzeppelin/contracts-ethereum-package/contracts/Initializable.sol:61"
+          },
+          {
+            "contract": "ContextUpgradeSafe",
+            "label": "__gap",
+            "type": "t_array(t_uint256)50_storage",
+            "src": "../@openzeppelin/contracts-ethereum-package/contracts/GSN/Context.sol:37"
+          },
+          {
+            "contract": "OwnableUpgradeSafe",
+            "label": "_owner",
+            "type": "t_address",
+            "src": "../@openzeppelin/contracts-ethereum-package/contracts/access/Ownable.sol:18"
+          },
+          {
+            "contract": "OwnableUpgradeSafe",
+            "label": "__gap",
+            "type": "t_array(t_uint256)49_storage",
+            "src": "../@openzeppelin/contracts-ethereum-package/contracts/access/Ownable.sol:78"
+          },
+          {
+            "contract": "YTXV3",
+            "label": "_balances",
+            "type": "t_mapping(t_address,t_uint256)",
+            "src": "YTXV3.sol:11"
+          },
+          {
+            "contract": "YTXV3",
+            "label": "_allowances",
+            "type": "t_mapping(t_address,t_mapping(t_address,t_uint256))",
+            "src": "YTXV3.sol:12"
+          },
+          {
+            "contract": "YTXV3",
+            "label": "_totalSupply",
+            "type": "t_uint256",
+            "src": "YTXV3.sol:13"
+          },
+          {
+            "contract": "YTXV3",
+            "label": "_name",
+            "type": "t_string_storage",
+            "src": "YTXV3.sol:14"
+          },
+          {
+            "contract": "YTXV3",
+            "label": "_symbol",
+            "type": "t_string_storage",
+            "src": "YTXV3.sol:15"
+          },
+          {
+            "contract": "YTXV3",
+            "label": "_decimals",
+            "type": "t_uint8",
+            "src": "YTXV3.sol:16"
+          },
+          {
+            "contract": "YTXV3",
+            "label": "isFrozen",
+            "type": "t_mapping(t_address,t_bool)",
+            "src": "YTXV3.sol:17"
+          },
+          {
+            "contract": "YTXV3",
+            "label": "transferFee",
+            "type": "t_uint256",
+            "src": "YTXV3.sol:18"
+          },
+          {
+            "contract": "YTXV3",
+            "label": "treasury",
+            "type": "t_address",
+            "src": "YTXV3.sol:19"
+          }
+        ],
+        "types": {
+          "t_mapping(t_address,t_uint256)": {
+            "label": "mapping(address => uint256)"
+          },
+          "t_mapping(t_address,t_mapping(t_address,t_uint256))": {
+            "label": "mapping(address => mapping(address => uint256))"
+          },
+          "t_uint256": {
+            "label": "uint256"
+          },
+          "t_string_storage": {
+            "label": "string"
+          },
+          "t_uint8": {
+            "label": "uint8"
+          },
+          "t_mapping(t_address,t_bool)": {
+            "label": "mapping(address => bool)"
+          },
+          "t_address": {
+            "label": "address"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]"
+          },
+          "t_bool": {
+            "label": "bool"
+          }
+        }
+      }
     }
   },
   "admin": {
