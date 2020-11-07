@@ -1,0 +1,27 @@
+{
+  "name": "ytx-contracts",
+  "version": "1.0.0",
+  "description": "",
+  "main": "truffle-config.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "deploy": "truffle deploy --network ropsten --reset"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ytxfinance/ytx-contracts.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ytxfinance/ytx-contracts/issues"
+  },
+  "homepage": "https://github.com/ytxfinance/ytx-contracts#readme",
+  "dependencies": {
+    "@openzeppelin/contracts-ethereum-package": "^3.0.0",
+    "@openzeppelin/truffle-upgrades": "^1.2.2",
+    "@truffle/hdwallet-provider": "^1.2.0"
+  }
+}

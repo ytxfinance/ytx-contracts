@@ -1,0 +1,236 @@
+{
+  "manifestVersion": "3.1",
+  "impls": {
+    "01574cf9e5345b5859bc45c1b0b7ad6c5346a8bc7affecb867f102536da1c95c": {
+      "address": "0x0e6B80875B621B0fb5C9Cae68ACf578F9F60532C",
+      "txHash": "0x51aa2e161d6cd9e10520211452dcfc437742b7f3d98b11d6d3f64a91e5771063",
+      "layout": {
+        "storage": [
+          {
+            "contract": "Initializable",
+            "label": "initialized",
+            "type": "t_bool",
+            "src": "../@openzeppelin/contracts-ethereum-package/contracts/Initializable.sol:21"
+          },
+          {
+            "contract": "Initializable",
+            "label": "initializing",
+            "type": "t_bool",
+            "src": "../@openzeppelin/contracts-ethereum-package/contracts/Initializable.sol:26"
+          },
+          {
+            "contract": "Initializable",
+            "label": "______gap",
+            "type": "t_array(t_uint256)50_storage",
+            "src": "../@openzeppelin/contracts-ethereum-package/contracts/Initializable.sol:61"
+          },
+          {
+            "contract": "ContextUpgradeSafe",
+            "label": "__gap",
+            "type": "t_array(t_uint256)50_storage",
+            "src": "../@openzeppelin/contracts-ethereum-package/contracts/GSN/Context.sol:37"
+          },
+          {
+            "contract": "OwnableUpgradeSafe",
+            "label": "_owner",
+            "type": "t_address",
+            "src": "../@openzeppelin/contracts-ethereum-package/contracts/access/Ownable.sol:18"
+          },
+          {
+            "contract": "OwnableUpgradeSafe",
+            "label": "__gap",
+            "type": "t_array(t_uint256)49_storage",
+            "src": "../@openzeppelin/contracts-ethereum-package/contracts/access/Ownable.sol:78"
+          },
+          {
+            "contract": "YTX",
+            "label": "_balances",
+            "type": "t_mapping(t_address,t_uint256)",
+            "src": "YTX.sol:11"
+          },
+          {
+            "contract": "YTX",
+            "label": "_allowances",
+            "type": "t_mapping(t_address,t_mapping(t_address,t_uint256))",
+            "src": "YTX.sol:12"
+          },
+          {
+            "contract": "YTX",
+            "label": "_totalSupply",
+            "type": "t_uint256",
+            "src": "YTX.sol:13"
+          },
+          {
+            "contract": "YTX",
+            "label": "_name",
+            "type": "t_string_storage",
+            "src": "YTX.sol:14"
+          },
+          {
+            "contract": "YTX",
+            "label": "_symbol",
+            "type": "t_string_storage",
+            "src": "YTX.sol:15"
+          },
+          {
+            "contract": "YTX",
+            "label": "_decimals",
+            "type": "t_uint8",
+            "src": "YTX.sol:16"
+          }
+        ],
+        "types": {
+          "t_mapping(t_address,t_uint256)": {
+            "label": "mapping(address => uint256)"
+          },
+          "t_mapping(t_address,t_mapping(t_address,t_uint256))": {
+            "label": "mapping(address => mapping(address => uint256))"
+          },
+          "t_uint256": {
+            "label": "uint256"
+          },
+          "t_string_storage": {
+            "label": "string"
+          },
+          "t_uint8": {
+            "label": "uint8"
+          },
+          "t_address": {
+            "label": "address"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]"
+          },
+          "t_bool": {
+            "label": "bool"
+          }
+        }
+      }
+    },
+    "c25ce172de09b4ccd047246902606e2fa17319ef095e848ca4fd985b4c7b8411": {
+      "address": "0x3547A3e755d0F52B7F355d253C64791f22E143B2",
+      "txHash": "0xf485fd5b00f64cd09b27f3b13c8baad53c07379240f137b1973d4dd3ff0bb305",
+      "layout": {
+        "storage": [
+          {
+            "contract": "Initializable",
+            "label": "initialized",
+            "type": "t_bool",
+            "src": "../@openzeppelin/contracts-ethereum-package/contracts/Initializable.sol:21"
+          },
+          {
+            "contract": "Initializable",
+            "label": "initializing",
+            "type": "t_bool",
+            "src": "../@openzeppelin/contracts-ethereum-package/contracts/Initializable.sol:26"
+          },
+          {
+            "contract": "Initializable",
+            "label": "______gap",
+            "type": "t_array(t_uint256)50_storage",
+            "src": "../@openzeppelin/contracts-ethereum-package/contracts/Initializable.sol:61"
+          },
+          {
+            "contract": "ContextUpgradeSafe",
+            "label": "__gap",
+            "type": "t_array(t_uint256)50_storage",
+            "src": "../@openzeppelin/contracts-ethereum-package/contracts/GSN/Context.sol:37"
+          },
+          {
+            "contract": "OwnableUpgradeSafe",
+            "label": "_owner",
+            "type": "t_address",
+            "src": "../@openzeppelin/contracts-ethereum-package/contracts/access/Ownable.sol:18"
+          },
+          {
+            "contract": "OwnableUpgradeSafe",
+            "label": "__gap",
+            "type": "t_array(t_uint256)49_storage",
+            "src": "../@openzeppelin/contracts-ethereum-package/contracts/access/Ownable.sol:78"
+          },
+          {
+            "contract": "YTX",
+            "label": "_balances",
+            "type": "t_mapping(t_address,t_uint256)",
+            "src": "YTX.sol:11"
+          },
+          {
+            "contract": "YTX",
+            "label": "_allowances",
+            "type": "t_mapping(t_address,t_mapping(t_address,t_uint256))",
+            "src": "YTX.sol:12"
+          },
+          {
+            "contract": "YTX",
+            "label": "_totalSupply",
+            "type": "t_uint256",
+            "src": "YTX.sol:13"
+          },
+          {
+            "contract": "YTX",
+            "label": "_name",
+            "type": "t_string_storage",
+            "src": "YTX.sol:14"
+          },
+          {
+            "contract": "YTX",
+            "label": "_symbol",
+            "type": "t_string_storage",
+            "src": "YTX.sol:15"
+          },
+          {
+            "contract": "YTX",
+            "label": "_decimals",
+            "type": "t_uint8",
+            "src": "YTX.sol:16"
+          },
+          {
+            "contract": "YTX",
+            "label": "isFrozen",
+            "type": "t_mapping(t_address,t_bool)",
+            "src": "YTX.sol:17"
+          }
+        ],
+        "types": {
+          "t_mapping(t_address,t_uint256)": {
+            "label": "mapping(address => uint256)"
+          },
+          "t_mapping(t_address,t_mapping(t_address,t_uint256))": {
+            "label": "mapping(address => mapping(address => uint256))"
+          },
+          "t_uint256": {
+            "label": "uint256"
+          },
+          "t_string_storage": {
+            "label": "string"
+          },
+          "t_uint8": {
+            "label": "uint8"
+          },
+          "t_mapping(t_address,t_bool)": {
+            "label": "mapping(address => bool)"
+          },
+          "t_address": {
+            "label": "address"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]"
+          },
+          "t_bool": {
+            "label": "bool"
+          }
+        }
+      }
+    }
+  },
+  "admin": {
+    "address": "0x86dCBB7cc172a7c7090303C7FC32e7996c2e9245",
+    "txHash": "0xe78cc98363ac9a5d124535228ac2c271e4c68f06d2790c22966f277a5c4e6b17"
+  }
+}
