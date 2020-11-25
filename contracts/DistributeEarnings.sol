@@ -25,6 +25,7 @@ contract Ownable {
     }
 }
 
+// The YTX contract to send earnings after playing games
 contract DistributeEarnings is Ownable {
     function init() public {
         require(owner == address(0));
