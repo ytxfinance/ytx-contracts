@@ -6,6 +6,11 @@ import '@openzeppelin/contracts-ethereum-package/contracts/token/ERC721/ERC721.s
 import '@openzeppelin/contracts-ethereum-package/contracts/token/ERC721/IERC721Metadata.sol';
 import '@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol';
 
+interface IYFS {
+    function mint(address _to, uint256 _amount) external;
+    function burn(address _to, uint256 _amount) external;
+}
+
 contract NFTGenerator is Initializable, OwnableUpgradeSafe, ERC721, IERC721Metadata {
     using SafeMath for uint256;
     
@@ -46,6 +51,9 @@ contract NFTGenerator is Initializable, OwnableUpgradeSafe, ERC721, IERC721Metad
     function unstakeYTXAndReceiveYFS(uint256 _amount) public {
         require(_amount < amountStaked[msg.sender], "You can't unstake more than your current stake");
         uint256 yfsGenerated = amountStaked[msg.sender].mul(timeStaked[msg.sender]).div(oneDayInBlocks);
+
+        // TODO Implement YFS transfer to the user
+        IYFS(yfs).mint(msg.sender, yfsGenerated);
     }
 
     // Allows the owner to create a blueprint which is a card with the defined properties
