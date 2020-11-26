@@ -11,21 +11,34 @@ interface IYFS {
     function burn(address _to, uint256 _amount) external;
 }
 
-contract NFTGenerator is Initializable, OwnableUpgradeSafe, ERC721, IERC721Metadata {
+contract NFTManager is Initializable, OwnableUpgradeSafe, ERC721, IERC721Metadata {
     using SafeMath for uint256;
+
+    struct Blueprint {
+        string tokenURI;
+        uint256 mintMax;
+        uint256 currentMint; // How many tokens of this type have been minted already
+        uint256 ytxCost;
+        uint256 yfsCost;
+    }
     
     // Time staked in blocks
     mapping (address => uint256) public timeStaked;
     mapping (address => uint256) public amountStaked;
+    mapping (string => Blueprint) public blueprints;
     uint256 public lastId;
     address public ytx;
     address public yfs;
     uint256 public oneDayInBlocks;
 
-    function initialize(address _ytx, address _yfs) public initializer {
+    function initialize(address _ytx, address _yfs, string memory baseUri_) public initializer {
         ytx = _ytx;
         yfs = _yfs;
         oneDayInBlocks = 6500;
+        _baseURI = baseUri_;
+        // ERC721 contract variables
+        _name = 'NFTManager';
+        _symbol = 'YTXNFT';
     }
 
     function setYTX(address _ytx) public onlyOwner {
@@ -36,36 +49,60 @@ contract NFTGenerator is Initializable, OwnableUpgradeSafe, ERC721, IERC721Metad
         yfs = _yfs;
     }
 
+    function setBaseURI(string memory baseURI_) public onlyOwner override {
+        _baseURI = baseURI_;
+    }
+
     // Stacking YTX RESETS the staking time
     function stakeYTX(uint256 _amount) public {
         // Check allowance
         uint256 allowance = IERC20(ytx).allowance(msg.sender, address(this));
         require(allowance >= _amount, 'You have to approve the required token amount to stake');
-        // Stake tokens here
-        IERC20(ytx).transfer(address(this), _amount);
-        amountStaked[msg.sender] = amountStaked[msg.sender].add(_amount);
+        IERC20(ytx).transferFrom(msg.sender, address(this), _amount);
         timeStaked[msg.sender] = block.number;
+        amountStaked[msg.sender] = amountStaked[msg.sender].add(_amount);
     }
 
     // Unstake YTX tokens and receive YFS tokens tradable for NFTs
     function unstakeYTXAndReceiveYFS(uint256 _amount) public {
         require(_amount < amountStaked[msg.sender], "You can't unstake more than your current stake");
         uint256 yfsGenerated = amountStaked[msg.sender].mul(timeStaked[msg.sender]).div(oneDayInBlocks);
-
-        // TODO Implement YFS transfer to the user
+        timeStaked[msg.sender] = block.number;
+        amountStaked[msg.sender] = amountStaked[msg.sender].sub(_amount);
         IYFS(yfs).mint(msg.sender, yfsGenerated);
+        IERC20(ytx).transfer(msg.sender, _amount);
     }
 
-    // Allows the owner to create a blueprint which is a card with the defined properties
-    function createBlueprint() public onlyOwner {
-
+    // Allows the owner to create a blueprint which is how many card can be minted for a particular tokenURI
+    // NOTE: Remember to deploy the json file to the right URI with the baseURI
+    function createBlueprint(string memory _tokenURI, uint256 _maxMint, uint256 _ytxCost, uint256 _yfsCost) public onlyOwner {
+        blueprints[_tokenURI] = Blueprint(_tokenURI, _maxMint, 0, _ytxCost, _yfsCost);
     }
 
     // Mint a card for the sender
-    function safeMint() public {
+    // NOTE: remember that the tokenURI most not have the baseURI. For instance:
+    // - BaseURI is https://examplenft.com/
+    // - TokenURI must be "token-1" or whatever without the BaseURI
+    // To create the resulting https://exampleNFT
+    function safeMint(string memory _tokenURI) public {
+        string memory emptyString = "";
+        // Check that this tokenURI exists
+        require(keccak256(bytes(blueprints[_tokenURI].tokenURI)) == keccak256(bytes(emptyString)) , "That token URI doesn't exist");
+        // Require than the amount of tokens to mint is not exceeded
+        require(blueprints[_tokenURI].mintMax > blueprints[_tokenURI].currentMint, 'The total amount of tokens for this URI have been minted already');
+        uint256 allowanceYTX = IERC20(ytx).allowance(msg.sender, address(this));
+        uint256 allowanceYFS = IERC20(yfs).allowance(msg.sender, address(this));
+        require(allowanceYTX >= blueprints[_tokenURI].ytxCost, 'You have to approve the required token amount of YTX to stake');
+        require(allowanceYFS >= blueprints[_tokenURI].yfsCost, 'You have to approve the required token amount of YFS to stake');
+        // Payment
+        IERC20(ytx).transferFrom(msg.sender, address(this), blueprints[_tokenURI].ytxCost);
+        IERC20(yfs).transferFrom(msg.sender, address(this), blueprints[_tokenURI].yfsCost);
+
+        blueprints[_tokenURI].currentMint++;
         lastId++;
-        // require()
         _safeMint(msg.sender, lastId, "");
+        // The token URI determines which NFT this is
+        _setTokenURI(lastId, _tokenUri);
     }
 
     function extractTokensIfStuck(address _token, uint256 _amount) public onlyOwner {

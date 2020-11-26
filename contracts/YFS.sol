@@ -15,29 +15,29 @@ contract YFS is Initializable, OwnableUpgradeSafe, IERC20 {
     string private _symbol;
     uint8 private _decimals;
     mapping (address => bool) public isFrozen;
-    address public nftGenerator;
+    address public nftManager;
 
-    modifier onlyGenerator {
-        require(msg.sender == nftGenerator || msg.sender == owner(), 'Only executable by the NFTGenerator contract or owner');
+    modifier onlyManager {
+        require(msg.sender == nftManager || msg.sender == owner(), 'Only executable by the NFTManager contract or owner');
         _;
     }
     
-    function initialize(address _nftGenerator) public initializer {
+    function initialize(address _nftManager) public initializer {
         _name = 'YFS';
         _symbol = 'YFS';
         _decimals = 18;
-        nftGenerator = _nftGenerator;
+        nftManager = _nftManager;
     }
 
-    function setGenerator(address _nftGenerator) public onlyOwner {
-        nftGenerator = _nftGenerator;
+    function setManager(address _nftManager) public onlyOwner {
+        nftManager = _nftManager;
     }
 
-    function mint(address _to, uint256 _amount) public onlyGenerator {
+    function mint(address _to, uint256 _amount) public onlyManager {
         _mint(_to, _amount);
     }
 
-    function burn(address _account, uint256 _amount) public onlyGenerator {
+    function burn(address _account, uint256 _amount) public onlyManager {
         _burn(_account, _amount);
     }
 
