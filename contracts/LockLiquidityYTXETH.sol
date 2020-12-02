@@ -1,5 +1,5 @@
 // The contract to lock the YTX liquidity and earn fees
-pragma solidity =0.6.0;
+pragma solidity =0.6.2;
 
 import '@openzeppelin/contracts-ethereum-package/contracts/access/Ownable.sol';
 import '@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/IERC20.sol';
@@ -69,7 +69,7 @@ contract LockLiquidityYTXETH is Initializable, OwnableUpgradeSafe {
     }
 
     function extractTokensIfStuck(address _token, uint256 _amount) public onlyOwner {
-        IERC20(_tokens).transfer(owner(), _amount);
+        IERC20(_token).transfer(owner(), _amount);
     }
 
     function extractETHIfStruck() public onlyOwner {
@@ -77,11 +77,11 @@ contract LockLiquidityYTXETH is Initializable, OwnableUpgradeSafe {
     }
 
     // Used to check how much liquidity the specific user has locked
-    function getUserLockedLiquidity(address _user) public view {
+    function getUserLockedLiquidity(address _user) public view returns (uint256) {
         return initialLockedLiquidity[_user];
     }
     
-    function getYtxFee(address _user) public view {
+    function getYtxFee(address _user) public view returns (uint256) {
         return ytxFee[_user];
     }
 }

@@ -1,4 +1,4 @@
-pragma solidity =0.6.0;
+pragma solidity =0.6.2;
 
 import '@openzeppelin/contracts-ethereum-package/contracts/access/Ownable.sol';
 import '@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/IERC20.sol';
@@ -12,7 +12,7 @@ interface IYFS {
 }
 
 // TODO Be able to break NFTs into their YTX tokens
-contract NFTManager is Initializable, OwnableUpgradeSafe, ERC721, IERC721Metadata {
+contract NFTManager is Initializable, OwnableUpgradeSafe, ERC721UpgradeSafe {
     using SafeMath for uint256;
 
     struct Blueprint {
@@ -36,10 +36,8 @@ contract NFTManager is Initializable, OwnableUpgradeSafe, ERC721, IERC721Metadat
         ytx = _ytx;
         yfs = _yfs;
         oneDayInBlocks = 6500;
-        _baseURI = baseUri_;
-        // ERC721 contract variables
-        _name = 'NFTManager';
-        _symbol = 'YTXNFT';
+        _setBaseURI(baseUri_);
+        __ERC721_init('NFTManager', 'YTXNFT');
     }
 
     function setYTX(address _ytx) public onlyOwner {
@@ -50,8 +48,8 @@ contract NFTManager is Initializable, OwnableUpgradeSafe, ERC721, IERC721Metadat
         yfs = _yfs;
     }
 
-    function setBaseURI(string memory baseURI_) public onlyOwner override {
-        _baseURI = baseURI_;
+    function setBaseURI(string memory baseURI_) public onlyOwner {
+        _setBaseURI(baseURI_);
     }
 
     // Stacking YTX RESETS the staking time
@@ -103,11 +101,11 @@ contract NFTManager is Initializable, OwnableUpgradeSafe, ERC721, IERC721Metadat
         lastId++;
         _safeMint(msg.sender, lastId, "");
         // The token URI determines which NFT this is
-        _setTokenURI(lastId, _tokenUri);
+        _setTokenURI(lastId, _tokenURI);
     }
 
     function extractTokensIfStuck(address _token, uint256 _amount) public onlyOwner {
-        IERC20(_tokens).transfer(owner(), _amount);
+        IERC20(_token).transfer(owner(), _amount);
     }
 
     function extractETHIfStruck() public onlyOwner {
