@@ -1,0 +1,95 @@
+The contracts are:
+- YTXv3: The main token contract. Upgradable. With a freeze function to freeze transfer for specific addresses so they don't extract the tokens in case of a hack. It also takes a 1% fee on transfer 
+
+
+how are we going to transfer the right fees to the right users?
+- by time.
+
+fees go inside the treasury
+there are locked LP tokens
+new tokens are added
+
+100 YTX go to the treasury
+There’s a 10% of the total YTX locked inside among 200 liquidity providers. Let’s assume each one adds the same amount of YTX. Therefore:
+
+100 YTX must be distributed among 200 LPs, since they all deposited the same amount, they will get each the same amount of YTX. 100 / 200 = 0.5 ytx per person
+
+now users receive tokens at different times since they must execute the extraction manually. The fees earned by each user must accomulate.
+
+since everyone deposited the same amount, we can store 0.5 as earnings.
+
+Lets say 200 YTX fees come in. That will be 1 YTX per user. Therefore earnings[msg.sender] will be 1.5 YTX.
+
+That way users wont be able to extract more than whats required per user.
+
+Users ONLY can extract their earned fees therefore the amounts will be fixed since liquidity is locked forever. 
+
+
+
+Now lets say there are 3 LPs and they deposit different quantities.
+- A: deposits 10 YTX which is 12.5%
+- B: deposits 20 YTX which is 25%
+- C: deposits 50 YTX which is 62.5%
+- TOTAL: 80 YTX
+
+There's a total of 300 YTX in the rewards treasury. How many YTX should each get?
+- A: 12.5% of 300 YTX = 37.5 YTX in rewards
+- B: 25% of 300 YTX = 75 YTX in rewards
+- C: 62.5% of 300 YTX = 187.5 YTX in rewards
+
+Note that 300 YTX is the total maximum. Not the total currently, meaning if anybody redeems their YTX, the maximum won't change but the current held amount in the SM will be reduced.
+
+Therefore:
+
+UserReward = % owned of the locked liquidity
+
+Problem: User's % owned could increase since users can add more liquidity anytime. Meaning the calculations won't be effective since the reward at one point will be different with a different LP given.
+
+Solution: use yTokens that increase in value. Just like Yearn.
+
+
+
+function lockLiquidity(uint256 _amount) public {
+    // Give user ytxFee tokens which are exchangeable for YTX rewards
+
+}
+
+// User A deposits 100 YTX. He gets 100 ytxFee. YTXFee price is 1
+// User B deposits 100 YTX. He gets 100 ytxFee too. YTXFee price is 1
+// A 1 YTX fee comes. Price increases to 1.01 so when user A wants to withdraw, he will get 100 * 1.005 ytx = 100.5 YTX
+// User C deposits 100 YTX. He gets 100 YTX / 1.005 = 99.5 YTXFee. YTXFee price is 1.005 ytx (unchanged)
+// A 10 YTX fee comes. 10 must be distributed accross 300 YTX. Therefore each YTXLP gives 0.033. Meaning if user has 100 ytxFee, his price will be 100 ytxFee * 0.033 meaning he will get 3.3333 ytx from that. Therefore price increases from 1.005 to 1.005 + 0.033 = 1.038
+
+Therefore price is = (feeIn / totalYTXFeeDistributed) + currentPrice
+
+- Price 1.005
+- Fee in 10 ytx. FEE in increases the price. The more locked, the smaller the price increase since it will be distributed among more people.
+- Total locked 300 ytx
+- Amount of people locked 3
+- User a deposit 100 ytx
+
+Example user A 100 ytxFee * 1.038 = 103.8 which is 100 + 3.33 + 0.5. Correct!
+User C has 99.5 ytxFee * 1.038 = 103.281. Incorrect. It should be 103.3
+
+// Rewards are based on:  total fee rewards 
+
+
+
+
+
+// User A deposits 100 YTX. He gets 100 ytxFee. YTXFee price is 1
+// User B deposits 100 YTX. He gets 100 ytxFee too. YTXFee price is 1
+// A 1 YTX fee comes. Price increases to 1.005 so when user A wants to withdraw, he will get 100 * 1.005 ytx = 100.5 YTX
+// User C deposits 100 YTX. He gets 100 YTX / 1.005 = 99.5 YTXFee. YTXFee price is 1.005 ytx (unchanged)
+// A 10 YTX fee comes. 10 must be distributed accross 300 YTX. Therefore each YTXLP gives 0.033. Meaning if user has 100 ytxFee, his price will be 100 ytxFee * 0.033 meaning he will get 3.3333 ytx from that. Therefore price increases from 1.005 to 1.005 + 0.033 = 1.038
+
+
+// User a and b get
+3,338870431893688
+3,338870431893688
+// User c gets
+-3,322259136212625
+
+
+3.3333 is 100%
+3,338870431893688 is 100.166%

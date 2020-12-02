@@ -1,13 +1,18 @@
 const { deployProxy, upgradeProxy } = require('@openzeppelin/truffle-upgrades')
-const DistributeEarnings = artifacts.require('DistributeEarnings')
-const YTX = artifacts.require('YTX')
+const LockLiquidityYTXETH = artifacts.require('LockLiquidityYTXETH')
 const YTXV3 = artifacts.require('YTXV3')
+const TestToken = artifacts.require('TestToken')
 
 module.exports = async function(deployer) {
-  const existing = await YTX.deployed()
-  // 1. Initial deployment
-  // await deployProxy(YTX, [], { deployer, initializer: 'initialize' });
-  // 2. Deploy upgraded contract
-  await upgradeProxy(existing.address, YTXV3, { deployer })
-  // await deployProxy(DistributeEarnings);
+  await deployProxy(TestToken, [], { deployer, initializer: 'initialize' });
+  await deployProxy(YTXV3, [], { deployer, initializer: 'initialize' });
+  const currentTestToken = await TestToken.deployed()
+  const currentYtx = await YTXV3.deployed()
+
+  await deployProxy(LockLiquidityYTXETH, [currentTestToken, currentYtx], { deployer, initializer: 'initialize' });
+  const currentTreasury = await LockLiquidityYTXETH.deployed()
+  await currentYtx.setTreasury(currentTreasury)
+
+  const setTreasury = await currentYtx.treasury()
+  console.log('Set treasury', setTreasury)
 }

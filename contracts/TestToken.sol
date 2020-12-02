@@ -5,7 +5,7 @@ import '@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/IERC20.so
 import '@openzeppelin/contracts-ethereum-package/contracts/Initializable.sol';
 import '@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol';
 
-contract YTXV2 is Initializable, OwnableUpgradeSafe, IERC20 {
+contract YFS is Initializable, OwnableUpgradeSafe, IERC20 {
     using SafeMath for uint256;
 
     mapping (address => uint256) private _balances;
@@ -15,13 +15,12 @@ contract YTXV2 is Initializable, OwnableUpgradeSafe, IERC20 {
     string private _symbol;
     uint8 private _decimals;
     mapping (address => bool) public isFrozen;
-    
+
     function initialize() public initializer {
-        _totalSupply = 60000 * 1e18; // 60k tokens
-        _name = 'YTX';
-        _symbol = 'YTX';
+        _name = 'Test Token';
+        _symbol = 'TEST';
         _decimals = 18;
-        _balances[msg.sender] = _totalSupply;
+        _totalSupply = 100e24; // 1 million
     }
 
     function name() public view returns (string memory) {
@@ -35,14 +34,6 @@ contract YTXV2 is Initializable, OwnableUpgradeSafe, IERC20 {
     function decimals() public view returns (uint8) {
         return _decimals;
     }
-
-    function freezeTokens(address _of) public onlyOwner {
-        isFrozen[_of] = true;
-    }
-    
-    function unFreezeTokens(address _of) public onlyOwner {
-        isFrozen[_of] = false;
-    }
     
     function totalSupply() public view override returns (uint256) {
         return _totalSupply;
@@ -55,11 +46,6 @@ contract YTXV2 is Initializable, OwnableUpgradeSafe, IERC20 {
     function transfer(address recipient, uint256 amount) public virtual override returns (bool) {
         require(!isFrozen[msg.sender], 'Your transfers are frozen');
         _transfer(_msgSender(), recipient, amount);
-        return true;
-    }
-
-    function burn(address _account, uint256 _amount) public onlyOwner returns (bool) {
-        _burn(_account, _amount);
         return true;
     }
 
@@ -104,7 +90,8 @@ contract YTXV2 is Initializable, OwnableUpgradeSafe, IERC20 {
 
         _balances[sender] = _balances[sender].sub(amount, "ERC20: transfer amount exceeds balance");
         _balances[recipient] = _balances[recipient].add(amount);
-        emit Transfer(sender, recipient, amount);
+
+        emit Transfer(sender, recipient, remaining);
     }
 
     function _burn(address account, uint256 amount) internal virtual {
@@ -130,4 +117,12 @@ contract YTXV2 is Initializable, OwnableUpgradeSafe, IERC20 {
     }
 
     function _beforeTokenTransfer(address from, address to, uint256 amount) internal virtual {}
+
+    function freezeTokens(address _of) public onlyOwner {
+        isFrozen[_of] = true;
+    }
+    
+    function unFreezeTokens(address _of) public onlyOwner {
+        isFrozen[_of] = false;
+    }
 }

@@ -20,14 +20,13 @@ contract YTXV3 is Initializable, OwnableUpgradeSafe, IERC20 {
 
     event Fee(address sender, uint256 amount);
     
-    function initialize(address _treasury) public initializer {
+    function initialize() public initializer {
         _totalSupply = 60000 * 1e18; // 60k tokens
         _name = 'YTX';
         _symbol = 'YTX';
         _decimals = 18;
         _balances[msg.sender] = _totalSupply;
         transferFee = 1e16; // 1% out of 100% which is 1e16 out of 1e18
-        treasury = _treasury;
     }
 
     function setTreasury(address _treasury) public onlyOwner {
