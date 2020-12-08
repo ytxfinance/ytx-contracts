@@ -1,7 +1,7 @@
 pragma solidity =0.6.2;
 
 import '@openzeppelin/contracts-ethereum-package/contracts/access/Ownable.sol';
-import '@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/ERC20.sol';
+import './ERC20UpgradeSafe.sol';
 import '@openzeppelin/contracts-ethereum-package/contracts/Initializable.sol';
 import '@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol';
 
@@ -58,19 +58,13 @@ contract YTXV3 is Initializable, OwnableUpgradeSafe, ERC20UpgradeSafe {
         return true;
     }
 
-    function _setupDecimals(uint8 decimals_) internal {
-        _decimals = decimals_;
-    }
-
     function extractETHIfStuck() public onlyOwner {
         payable(owner()).transfer(address(this).balance);
     }
 
     function extractTokenIfStuck(address _token, uint256 _amount) public onlyOwner {
-        ERC20(_token).transfer(owner(), _amount);
+        ERC20UpgradeSafe(_token).transfer(owner(), _amount);
     }
-
-    function _beforeTokenTransfer(address from, address to, uint256 amount) internal virtual {}
 
     function freezeTokens(address _of) public onlyOwner {
         isFrozen[_of] = true;
@@ -87,29 +81,5 @@ contract YTXV3 is Initializable, OwnableUpgradeSafe, ERC20UpgradeSafe {
     function calculateFee(uint256 _amount) internal view returns(uint256 fee, uint256 remaining) {
         fee = _amount.mul(transferFee).div(1e18);
         remaining = _amount.sub(fee);
-    }
-
-    function name() public view returns (string memory) {
-        return _name;
-    }
-    
-    function symbol() public view returns (string memory) {
-        return _symbol;
-    }
-    
-    function decimals() public view returns (uint8) {
-        return _decimals;
-    }
-    
-    function totalSupply() public view override returns (uint256) {
-        return _totalSupply;
-    }
-    
-    function balanceOf(address account) public view override returns (uint256) {
-        return _balances[account];
-    }
-
-    function allowance(address owner, address spender) public view virtual override returns (uint256) {
-        return _allowances[owner][spender];
     }
 }

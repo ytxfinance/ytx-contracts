@@ -11,6 +11,8 @@ contract('LockLiquidity', accs => {
 	beforeEach(async () => {
         testToken = await TestToken.new()
         ytx = await YTXV3.new()
+        console.log('owner', await ytx.owner())
+        console.log('a', accs[0])
         lockLiquidity = await LockLiquidity.new(testToken.address, ytx.address)
         console.log('Executing setLockLiquidityContract...')
         await ytx.setLockLiquidityContract(lockLiquidity.address)

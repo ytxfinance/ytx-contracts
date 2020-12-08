@@ -1,7 +1,7 @@
 pragma solidity ^0.6.0;
 
 import "@openzeppelin/contracts-ethereum-package/contracts/GSN/Context.sol";
-import "@openzeppelin/contracts-ethereum-package/contracts/ERC20/IERC20.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/utils/Address.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/Initializable.sol";

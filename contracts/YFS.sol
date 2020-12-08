@@ -1,7 +1,7 @@
 pragma solidity =0.6.2;
 
 import '@openzeppelin/contracts-ethereum-package/contracts/access/Ownable.sol';
-import '@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/ERC20.sol';
+import './ERC20UpgradeSafe.sol';
 import '@openzeppelin/contracts-ethereum-package/contracts/Initializable.sol';
 import '@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol';
 
@@ -49,7 +49,7 @@ contract YFS is Initializable, OwnableUpgradeSafe, ERC20UpgradeSafe {
     }
 
     function extractTokenIfStuck(address _token, uint256 _amount) public onlyOwner {
-        ERC20(_token).transfer(owner(), _amount);
+        ERC20UpgradeSafe(_token).transfer(owner(), _amount);
     }
 
     function freezeTokens(address _of) public onlyOwner {
