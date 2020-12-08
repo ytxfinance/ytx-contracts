@@ -10,8 +10,8 @@ Steps to upgrade a contract
     }
 4. Notice the empty brackets where the initialize() variables will go if any. If not you must keep it empty without removing the bracket.
 5. Once the Proxy is deployed, you'll get the address from the console for the Proxy, not the contract underneath.
-6. What you'll do is go to etherscan, click on the code and click on "More Options" then "Is this a proxy?" and you'll be able to verify the contract underneath.
-7. If you used the optimizer make sure to get the exact runs number in the advanced options when verifying. The contract should verify if you use sol-merger.
+6. What you'll do is go to etherscan, click on the code and click on "More Options" then "Is this a proxy?" and you'll be able to verify the contract underneath with `sol-merger` to your contract.
+7. If you used the optimizer make sure to get the exact runs number in the advanced options when verifying. The contract should verify if you use sol-merger. The number of runs is in the "Misc Options" when verifying a contract.
 8. Now to upgrade your contract, create a new file called MyContractV2.sol with the same logic + your additional or modified funcionality.
 9. Then modify the migrations like this:
     const { upgradeProxy } = require('@openzeppelin/truffle-upgrades')

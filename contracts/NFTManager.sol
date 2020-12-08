@@ -33,11 +33,12 @@ contract NFTManager is Initializable, OwnableUpgradeSafe, ERC721UpgradeSafe {
     uint256 public oneDayInBlocks;
 
     function initialize(address _ytx, address _yfs, string memory baseUri_) public initializer {
+        __Ownable_init();
+        __ERC721_init('NFTManager', 'YTXNFT');
+        _setBaseURI(baseUri_);
         ytx = _ytx;
         yfs = _yfs;
         oneDayInBlocks = 6500;
-        _setBaseURI(baseUri_);
-        __ERC721_init('NFTManager', 'YTXNFT');
     }
 
     function setYTX(address _ytx) public onlyOwner {

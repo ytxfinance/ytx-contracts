@@ -7,13 +7,6 @@ import '@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol';
 
 contract YFS is Initializable, OwnableUpgradeSafe, ERC20UpgradeSafe {
     using SafeMath for uint256;
-
-    mapping (address => uint256) private _balances;
-    mapping (address => mapping (address => uint256)) private _allowances;
-    uint256 private _totalSupply;
-    string private _name;
-    string private _symbol;
-    uint8 private _decimals;
     mapping (address => bool) public isFrozen;
     address public nftManager;
 
@@ -23,9 +16,9 @@ contract YFS is Initializable, OwnableUpgradeSafe, ERC20UpgradeSafe {
     }
     
     function initialize(address _nftManager) public initializer {
-        _name = 'YFS';
-        _symbol = 'YFS';
-        _decimals = 18;
+        __Ownable_init();
+        __ERC20_init('YFS', 'YFS');
+        // Decimals are set to 18 by default
         nftManager = _nftManager;
     }
 
@@ -41,10 +34,14 @@ contract YFS is Initializable, OwnableUpgradeSafe, ERC20UpgradeSafe {
         _burn(_account, _amount);
     }
     
-    function transfer(address recipient, uint256 amount) public virtual override returns (bool) {
+    function _transfer(address sender, address recipient, uint256 amount) internal override {
         require(!isFrozen[msg.sender], 'Your transfers are frozen');
-        _transfer(_msgSender(), recipient, amount);
-        return true;
+        require(sender != address(0), "ERC20: transfer from the zero address");
+        require(recipient != address(0), "ERC20: transfer to the zero address");
+        _beforeTokenTransfer(sender, recipient, amount);
+        _balances[sender] = _balances[sender].sub(amount, "ERC20: transfer amount exceeds balance");
+        _balances[recipient] = _balances[recipient].add(amount);
+        emit Transfer(sender, recipient, amount);
     }
 
     function extractETHIfStuck() public onlyOwner {
@@ -52,7 +49,7 @@ contract YFS is Initializable, OwnableUpgradeSafe, ERC20UpgradeSafe {
     }
 
     function extractTokenIfStuck(address _token, uint256 _amount) public onlyOwner {
-        IERC20(_token).transfer(owner(), _amount);
+        ERC20(_token).transfer(owner(), _amount);
     }
 
     function freezeTokens(address _of) public onlyOwner {

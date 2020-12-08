@@ -23,5 +23,8 @@
     "@openzeppelin/contracts-ethereum-package": "^3.0.0",
     "@openzeppelin/truffle-upgrades": "^1.2.2",
     "@truffle/hdwallet-provider": "^1.2.0"
+  },
+  "devDependencies": {
+    "bignumber.js": "^9.0.1"
   }
 }

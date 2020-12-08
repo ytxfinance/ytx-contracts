@@ -6,14 +6,10 @@ import '@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/IERC20.so
 import '@openzeppelin/contracts-ethereum-package/contracts/Initializable.sol';
 import '@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol';
 
-interface ILockLiquidityYTXETH {
-    function totalLiquidityLocked(address _user) external view;
-    function getUserLockedLiquidity(address _user) external view;
-}
-
 /// @notice This contract allows you to lock liquidity LP tokens and receive earnings
-/// It also allows you to extract those earnings. It's the treasury where the fee YTX is stored
-contract LockLiquidityYTXETH is Initializable, OwnableUpgradeSafe {
+/// It also allows you to extract those earnings
+/// It's the treasury where the feeYTX, YTX and LP YTX tokens are stored
+contract LockLiquidity is Initializable, OwnableUpgradeSafe {
     using SafeMath for uint256;
 
     mapping (address => uint256) public initialLockedLiquidity;
@@ -31,6 +27,7 @@ contract LockLiquidityYTXETH is Initializable, OwnableUpgradeSafe {
     uint256 public ytxFeePrice;
     
     function initialize(address _uniswapLPContract, address _ytx) public initializer {
+        __Ownable_init();
         uniswapLPContract = _uniswapLPContract;
         ytx = _ytx;
     }
@@ -41,6 +38,14 @@ contract LockLiquidityYTXETH is Initializable, OwnableUpgradeSafe {
 
     function setUniswapLPContract(address _uniswapLPContract) public onlyOwner {
         uniswapLPContract = _uniswapLPContract;
+    }
+
+    // When fee is added, the price is increased
+    function addFeeAndUpdatePrice(uint256 _amount) public {
+        require(msg.sender == ytx, 'Only the YTX contract can execute this function');
+        // price is = (feeIn / totalYTXFeeDistributed) + currentPrice
+        // pad it with 18 zeroes since amount is always smaller than total ytxFee minted
+        ytxFeePrice = (_amount.add(1e18).div(totalYtxFeeMined)).add(ytxFeePrice).sub(1e18);
     }
 
     function lockLiquidity(uint256 _amount) public {
