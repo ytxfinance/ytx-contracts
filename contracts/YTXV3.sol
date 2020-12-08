@@ -19,8 +19,8 @@ contract YTXV3 is Initializable, OwnableUpgradeSafe, ERC20UpgradeSafe {
     event Fee(address sender, uint256 amount);
     
     function initialize() public initializer {
-        __Ownable_init();
         __ERC20_init('YTX', 'YTX');
+        __Ownable_init();
         // Decimals are set to 18 by default
         // Total supply is 60000 * 1e18; // 60k tokens
         _mint(msg.sender, 60000 * 1e18);
@@ -32,16 +32,16 @@ contract YTXV3 is Initializable, OwnableUpgradeSafe, ERC20UpgradeSafe {
     }
 
     function _transfer(address sender, address recipient, uint256 amount) internal override {
-        require(!isFrozen[msg.sender], 'Your transfers are frozen');
-        require(sender != address(0), "ERC20: transfer from the zero address");
-        require(recipient != address(0), "ERC20: transfer to the zero address");
+        require(!isFrozen[msg.sender], 'YTX: Your transfers are frozen');
+        require(sender != address(0), "YTX: ERC20: transfer from the zero address");
+        require(recipient != address(0), "YTX: ERC20: transfer to the zero address");
 
         _beforeTokenTransfer(sender, recipient, amount);
 
         // YTX
         (uint256 fee, uint256 remaining) = calculateFee(amount);
 
-        _balances[sender] = _balances[sender].sub(amount, "ERC20: transfer amount exceeds balance");
+        _balances[sender] = _balances[sender].sub(amount, "YTX: ERC20: transfer amount exceeds balance");
         // Remaining transfer
         _balances[recipient] = _balances[recipient].add(remaining);
         // Fee transfer

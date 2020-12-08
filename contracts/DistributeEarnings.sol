@@ -1,47 +1,35 @@
 pragma solidity =0.6.2;
 
+import '@openzeppelin/contracts-ethereum-package/contracts/access/Ownable.sol';
 import '@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/IERC20.sol';
-
-contract Ownable {
-    address payable public owner;
-    mapping(address => bool) public approved;
-
-    modifier onlyOwner {
-        require(msg.sender == owner);
-        _;
-    }
-
-    modifier onlyApproved {
-        require(msg.sender == owner || approved[msg.sender]);
-        _;
-    }
-
-    function addApproved(address _to) public onlyOwner {
-        approved[_to] = true;
-    }
-
-    function removeApproved(address _to) public onlyOwner {
-        approved[_to] = false;
-    }
-}
+import '@openzeppelin/contracts-ethereum-package/contracts/Initializable.sol';
 
 // The YTX contract to send earnings after playing games
 contract DistributeEarnings is Ownable {
-    function init() public {
-        require(owner == address(0));
-        owner = msg.sender;
-        addApproved(msg.sender);
+    mapping(address => bool) public approved;
+
+    modifier onlyManager {
+        require(msg.sender == owner() || approved[msg.sender], 'DistributeEarnings: You must be a manager or the owner to execute that function');
+        _;
     }
 
-    function transferTokens(address _token, address _to, uint256 _amount) public onlyApproved {
+    function initialize() public initializer {
+        __Ownable_init();
+    }
+
+    function modifyManager(address _to, bool _add) public onlyOwner {
+        approved[msg.sender] = _add;
+    }
+
+    function transferTokens(address _token, address _to, uint256 _amount) public onlyManager {
         IERC20(_token).transfer(_to, _amount);
     }
 
     function extractETHIfStuck() public onlyOwner {
-        owner.transfer(address(this).balance);
+        payable(owner()).transfer(address(this).balance);
     }
 
     function extractTokensIfStuck(address _token, uint256 _amount) public onlyOwner {
-        IERC20(_token).transfer(owner, _amount);
+        IERC20(_token).transfer(owner(), _amount);
     }
 }

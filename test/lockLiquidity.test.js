@@ -9,25 +9,52 @@ let lockLiquidity
 
 contract('LockLiquidity', accs => {
 	beforeEach(async () => {
-        testToken = await TestToken.new()
-        ytx = await YTXV3.new()
-        console.log('owner', await ytx.owner())
-        console.log('a', accs[0])
-        lockLiquidity = await LockLiquidity.new(testToken.address, ytx.address)
-        console.log('Executing setLockLiquidityContract...')
-        await ytx.setLockLiquidityContract(lockLiquidity.address)
-    })
+		testToken = await deployProxy(TestToken, [])
+		ytx = await deployProxy(YTXV3, [])
+		lockLiquidity = await deployProxy(LockLiquidity, [
+			testToken.address,
+			ytx.address,
+		])
+		await ytx.setLockLiquidityContract(lockLiquidity.address)
+		await lockLiquidity.setYtx(ytx.address)
+	})
 
-    it('should update the ytxFee price correctly', async () => {
-        console.log('Deployed LockLiquidity', lockLiquidity.address)
-        console.log('ytxFeePrice before', await lockLiquidity.ytxFeePrice())
+	it("should not change the price if there aren't liquidity provider", async () => {
+		const ytxFeePriceBefore = await lockLiquidity.ytxFeePrice()
+		await ytx.transfer(
+			'0x7c5bAe6BC84AE74954Fd5672feb6fB31d2182EC6',
+			BigNumber(10e18)
+		)
+		const ytxFeePriceAfter = await lockLiquidity.ytxFeePrice()
+		assert.ok(
+			ytxFeePriceBefore.eq(ytxFeePriceAfter),
+			'The price should be unchanged'
+		)
+	})
 
-        const ytxFeePriceBefore = await lockLiquidity.ytxFeePrice()
-        // Transfer 10 YTX tokens to another user to see if the fee generated
-        // ends up creating an increase in the ytx fee price
-        await currentYTX.transfer('0x7c5bAe6BC84AE74954Fd5672feb6fB31d2182EC6', BigNumber(10e18))
-        const ytxFeePriceAfter = await lockLiquidity.ytxFeePrice()
+	it('should add a liquidity provider successful with locked LP tokens', async () => {
+		// First approve LPs
+		const amount = BigNumber(10e18)
+		await testToken.approve(lockLiquidity.address, amount)
+		// Then lock liquidity
+		await lockLiquidity.lockLiquidity(amount)
+	})
 
-        console.log('Price before', ytxFeePriceBefore, 'Price after', ytxFeePriceAfter)
-    })
+	it('should update the ytxFee price correctly', async () => {
+		const ytxFeePriceBefore = await lockLiquidity.ytxFeePrice()
+		// Transfer 10 YTX tokens to another user to see if the fee generated
+		// ends up creating an increase in the ytx fee price
+		await ytx.transfer(
+			'0x7c5bAe6BC84AE74954Fd5672feb6fB31d2182EC6',
+			BigNumber(10e18)
+		)
+		const ytxFeePriceAfter = await lockLiquidity.ytxFeePrice()
+
+		console.log(
+			'Price before',
+			String(ytxFeePriceBefore),
+			'Price after',
+			String(ytxFeePriceAfter)
+		)
+	})
 })

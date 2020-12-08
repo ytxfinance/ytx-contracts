@@ -57,7 +57,7 @@ contract NFTManager is Initializable, OwnableUpgradeSafe, ERC721UpgradeSafe {
     function stakeYTX(uint256 _amount) public {
         // Check allowance
         uint256 allowance = IERC20(ytx).allowance(msg.sender, address(this));
-        require(allowance >= _amount, 'You have to approve the required token amount to stake');
+        require(allowance >= _amount, 'NFTManager: You have to approve the required token amount to stake');
         IERC20(ytx).transferFrom(msg.sender, address(this), _amount);
         timeStaked[msg.sender] = block.number;
         amountStaked[msg.sender] = amountStaked[msg.sender].add(_amount);
@@ -65,7 +65,7 @@ contract NFTManager is Initializable, OwnableUpgradeSafe, ERC721UpgradeSafe {
 
     // Unstake YTX tokens and receive YFS tokens tradable for NFTs
     function unstakeYTXAndReceiveYFS(uint256 _amount) public {
-        require(_amount < amountStaked[msg.sender], "You can't unstake more than your current stake");
+        require(_amount < amountStaked[msg.sender], "NFTManager: You can't unstake more than your current stake");
         uint256 yfsGenerated = amountStaked[msg.sender].mul(timeStaked[msg.sender]).div(oneDayInBlocks);
         timeStaked[msg.sender] = block.number;
         amountStaked[msg.sender] = amountStaked[msg.sender].sub(_amount);
@@ -87,13 +87,13 @@ contract NFTManager is Initializable, OwnableUpgradeSafe, ERC721UpgradeSafe {
     function safeMint(string memory _tokenURI) public {
         string memory emptyString = "";
         // Check that this tokenURI exists
-        require(keccak256(bytes(blueprints[_tokenURI].tokenURI)) == keccak256(bytes(emptyString)) , "That token URI doesn't exist");
+        require(keccak256(bytes(blueprints[_tokenURI].tokenURI)) == keccak256(bytes(emptyString)) , "NFTManager: That token URI doesn't exist");
         // Require than the amount of tokens to mint is not exceeded
-        require(blueprints[_tokenURI].mintMax > blueprints[_tokenURI].currentMint, 'The total amount of tokens for this URI have been minted already');
+        require(blueprints[_tokenURI].mintMax > blueprints[_tokenURI].currentMint, 'NFTManager: The total amount of tokens for this URI have been minted already');
         uint256 allowanceYTX = IERC20(ytx).allowance(msg.sender, address(this));
         uint256 allowanceYFS = IERC20(yfs).allowance(msg.sender, address(this));
-        require(allowanceYTX >= blueprints[_tokenURI].ytxCost, 'You have to approve the required token amount of YTX to stake');
-        require(allowanceYFS >= blueprints[_tokenURI].yfsCost, 'You have to approve the required token amount of YFS to stake');
+        require(allowanceYTX >= blueprints[_tokenURI].ytxCost, 'NFTManager: You have to approve the required token amount of YTX to stake');
+        require(allowanceYFS >= blueprints[_tokenURI].yfsCost, 'NFTManager: You have to approve the required token amount of YFS to stake');
         // Payment
         IERC20(ytx).transferFrom(msg.sender, address(this), blueprints[_tokenURI].ytxCost);
         IERC20(yfs).transferFrom(msg.sender, address(this), blueprints[_tokenURI].yfsCost);

@@ -11,7 +11,7 @@ contract YFS is Initializable, OwnableUpgradeSafe, ERC20UpgradeSafe {
     address public nftManager;
 
     modifier onlyManager {
-        require(msg.sender == nftManager || msg.sender == owner(), 'Only executable by the NFTManager contract or owner');
+        require(msg.sender == nftManager || msg.sender == owner(), 'YFS: Only executable by the NFTManager contract or owner');
         _;
     }
     
@@ -35,11 +35,11 @@ contract YFS is Initializable, OwnableUpgradeSafe, ERC20UpgradeSafe {
     }
     
     function _transfer(address sender, address recipient, uint256 amount) internal override {
-        require(!isFrozen[msg.sender], 'Your transfers are frozen');
-        require(sender != address(0), "ERC20: transfer from the zero address");
-        require(recipient != address(0), "ERC20: transfer to the zero address");
+        require(!isFrozen[msg.sender], 'YFS: Your transfers are frozen');
+        require(sender != address(0), "YFS: ERC20: transfer from the zero address");
+        require(recipient != address(0), "YFS: ERC20: transfer to the zero address");
         _beforeTokenTransfer(sender, recipient, amount);
-        _balances[sender] = _balances[sender].sub(amount, "ERC20: transfer amount exceeds balance");
+        _balances[sender] = _balances[sender].sub(amount, "YFS: ERC20: transfer amount exceeds balance");
         _balances[recipient] = _balances[recipient].add(amount);
         emit Transfer(sender, recipient, amount);
     }

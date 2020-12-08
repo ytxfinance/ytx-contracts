@@ -25,6 +25,7 @@ contract LockLiquidity is Initializable, OwnableUpgradeSafe {
     // The total YTXFee generated
     uint256 public totalYtxFeeMined;
     uint256 public ytxFeePrice;
+    uint256 public accomulatedRewards;
     
     function initialize(address _uniswapLPContract, address _ytx) public initializer {
         __Ownable_init();
@@ -40,32 +41,44 @@ contract LockLiquidity is Initializable, OwnableUpgradeSafe {
         uniswapLPContract = _uniswapLPContract;
     }
 
-    // When fee is added, the price is increased
+    /// @notice When fee is added, the price is increased
+    /// Price is = (feeIn / totalYTXFeeDistributed) + currentPrice
+    /// padded with 18 zeroes that get removed after the calculations
+    /// if there are no locked LPs, the price is 0
     function addFeeAndUpdatePrice(uint256 _amount) public {
-        require(msg.sender == ytx, 'Only the YTX contract can execute this function');
-        // price is = (feeIn / totalYTXFeeDistributed) + currentPrice
-        // pad it with 18 zeroes since amount is always smaller than total ytxFee minted
-        ytxFeePrice = (_amount.add(1e18).div(totalYtxFeeMined)).add(ytxFeePrice).sub(1e18);
+        require(msg.sender == ytx, 'LockLiquidity: Only the YTX contract can execute this function');
+        accomulatedRewards = accomulatedRewards.add(_amount);
+        if (totalYtxFeeMined == 0) {
+            ytxFeePrice = 0;
+        } else {
+            ytxFeePrice = (_amount.add(1e18).div(totalYtxFeeMined)).add(ytxFeePrice).sub(1e18);
+        }
     }
+
+    // I.E. 10 LP tokens first liquidity provider
+    // ytxFee[msg.sender] = 10 ytxFeePrice = 0
+    // 
 
     function lockLiquidity(uint256 _amount) public {
         // Transfer UNI-LP-V2 tokens inside here forever while earning fees from every transfer, LP tokens can't be extracted
         uint256 approval = IERC20(uniswapLPContract).allowance(msg.sender, address(this));
-        require(approval >= _amount, 'You must approve the desired amount of liquidity tokens to this contract first');
+        require(approval >= _amount, 'LockLiquidity: You must approve the desired amount of liquidity tokens to this contract first');
         IERC20(uniswapLPContract).transferFrom(msg.sender, address(this), _amount);
         initialLockedLiquidity[msg.sender] = initialLockedLiquidity[msg.sender].add(_amount);
         totalLiquidityLocked = totalLiquidityLocked.add(_amount);
-        uint256 myYtxFee = _amount.div(ytxFeePrice);
+        uint256 myYtxFee = _amount;
+        if (ytxFeePrice != 0) {
+            myYtxFee = _amount.div(ytxFeePrice);
+        }        
         totalYtxFeeMined = totalYtxFeeMined.add(myYtxFee);
         // The price doesn't change when locking liquidity. It changes when fees are generated from transfers
-        // TODO: update price on fee generation (when transfering from the YTX contract)
         ytxFee[msg.sender] = ytxFee[msg.sender].add(myYtxFee);
     }
 
     // We check for new earnings by seeing if the price the user last extracted his earnings
     // is the same or not to determine whether he can extract new earnings or not
     function extractEarnings() public {
-        require(lastPriceEarningsExtracted[msg.sender] != ytxFeePrice, 'You already extracted your earnings');
+        require(lastPriceEarningsExtracted[msg.sender] != ytxFeePrice, 'LockLiquidity: You already extracted your earnings');
         // The ytxFee price minus the last price extracted
         uint256 myPrice = ytxFeePrice - lastPriceEarningsExtracted[msg.sender];
         uint256 earnings = ytxFee[msg.sender].mul(myPrice);
