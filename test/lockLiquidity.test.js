@@ -8,6 +8,8 @@ let ytx
 let lockLiquidity
 
 contract('LockLiquidity', accs => {
+	const defaultAmount = BigNumber(10e18)
+
 	beforeEach(async () => {
 		testToken = await deployProxy(TestToken, [])
 		ytx = await deployProxy(YTXV3, [])
@@ -19,11 +21,13 @@ contract('LockLiquidity', accs => {
 		await lockLiquidity.setYtx(ytx.address)
 	})
 
+	// Works
 	it("should not change the price if there aren't liquidity provider", async () => {
 		const ytxFeePriceBefore = await lockLiquidity.ytxFeePrice()
+		// Send YTX to a random address to activate the fee system
 		await ytx.transfer(
 			'0x7c5bAe6BC84AE74954Fd5672feb6fB31d2182EC6',
-			BigNumber(10e18)
+			defaultAmount,
 		)
 		const ytxFeePriceAfter = await lockLiquidity.ytxFeePrice()
 		assert.ok(
@@ -32,29 +36,52 @@ contract('LockLiquidity', accs => {
 		)
 	})
 
+	// Works
 	it('should add a liquidity provider successful with locked LP tokens', async () => {
-		// First approve LPs
-		const amount = BigNumber(10e18)
-		await testToken.approve(lockLiquidity.address, amount)
-		// Then lock liquidity
-		await lockLiquidity.lockLiquidity(amount)
-	})
-
-	it('should update the ytxFee price correctly', async () => {
-		const ytxFeePriceBefore = await lockLiquidity.ytxFeePrice()
-		// Transfer 10 YTX tokens to another user to see if the fee generated
-		// ends up creating an increase in the ytx fee price
+		// Add some fee YTX tokens to distribute
 		await ytx.transfer(
 			'0x7c5bAe6BC84AE74954Fd5672feb6fB31d2182EC6',
-			BigNumber(10e18)
+			defaultAmount,
 		)
-		const ytxFeePriceAfter = await lockLiquidity.ytxFeePrice()
+		// First approve LPs
+		await testToken.approve(lockLiquidity.address, defaultAmount)
+		// Then lock liquidity
+		await lockLiquidity.lockLiquidity(defaultAmount)
+	})
 
-		console.log(
-			'Price before',
-			String(ytxFeePriceBefore),
-			'Price after',
-			String(ytxFeePriceAfter)
-		)
+	// Works
+	it('should setup the initial ytxFeePrice', async () => {
+		const expectedFee = 1e16 // From a 10e18 transfer, a 1% fee is .1e18
+		await addInitialLiquidityWithFee(defaultAmount, ytx, testToken, lockLiquidity,)
+		const updatedYtxFeePrice = String(await lockLiquidity.ytxFeePrice())
+
+		assert.ok(updatedYtxFeePrice == 1e18 + expectedFee, 'The updated ytxFeePrice is not correct')
+		assert.ok(updatedYtxFeePrice * defaultAmount == defaultAmount * (1e18 + expectedFee), 'The converted value is not correct')
+	})
+
+	// Works
+	it('should update the ytxFee price correctly after the initial price', async () => {
+		const expectedFee = 1e16 // From a 10e18 transfer, a 1% fee is .1e18
+		await addInitialLiquidityWithFee(defaultAmount, ytx, testToken, lockLiquidity,)
+		const updatedYtxFeePrice = String(await lockLiquidity.ytxFeePrice())
+		assert.ok(updatedYtxFeePrice == 1e18 + expectedFee, 'The updated ytxFeePrice is not correct')
+		assert.ok(updatedYtxFeePrice * defaultAmount == defaultAmount * (1e18 + expectedFee), 'The converted value is not correct')
+
+		await addInitialLiquidityWithFee(defaultAmount, ytx, testToken, lockLiquidity,)
+		const finalUpdatedYtxFeePrice = String(await lockLiquidity.ytxFeePrice())
+		console.log('finalUpdatedYtxFeePrice', finalUpdatedYtxFeePrice)
+		assert.ok(finalUpdatedYtxFeePrice == 1e18 + expectedFee + (expectedFee/2), 'The final updated ytxFeePrice is not correct after 2 liquidity provisions and providers')
 	})
 })
+
+const addInitialLiquidityWithFee = async (defaultAmount, ytx, testToken, lockLiquidity) => {
+	// Add some fee YTX tokens to distribute
+	await ytx.transfer(
+		'0x7c5bAe6BC84AE74954Fd5672feb6fB31d2182EC6',
+		defaultAmount,
+	)
+	// First approve LPs
+	await testToken.approve(lockLiquidity.address, defaultAmount)
+	// Then lock liquidity
+	await lockLiquidity.lockLiquidity(defaultAmount)
+}

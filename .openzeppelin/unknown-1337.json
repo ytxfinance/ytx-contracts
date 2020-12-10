@@ -121,7 +121,7 @@
     },
     "92a36471fd355caaa7ed2306c01a29006c23992bebf5a9a311314332e854edd5": {
       "address": "0xf25186B5081Ff5cE73482AD761DB0eB0d25abfBF",
-      "txHash": "0xfab11b4cdb2aa2bef397e1164e5895b56a03b1e60f37a8d4cba39eff99ad11ef",
+      "txHash": "0x461390755ad0f84bf0dff0af9600ea32fac3a2e9edd4be79430be9205081648f",
       "layout": {
         "storage": [
           {
@@ -258,9 +258,9 @@
         }
       }
     },
-    "9bacb170d88ff8750aeb90ad9ee5bc1bdc68ad207bcc713e720da31f0067f875": {
+    "cb400f430fdb1747d0a07d7155cae21caddecb04fe2296053df4d4c94c87a9d5": {
       "address": "0x9FBDa871d559710256a2502A2517b794B482Db40",
-      "txHash": "0x6d5769dd8836855f487c5f975d719a60468c639b7579dd4e90c8a1ffa0080765",
+      "txHash": "0x8738dbe25c4a22e09d7719bbfa8af342cbf4634999132ffff2ebcfd4fcd15cce",
       "layout": {
         "storage": [
           {
@@ -346,6 +346,18 @@
             "label": "ytxFeePrice",
             "type": "t_uint256",
             "src": "LockLiquidity.sol:27"
+          },
+          {
+            "contract": "LockLiquidity",
+            "label": "accomulatedRewards",
+            "type": "t_uint256",
+            "src": "LockLiquidity.sol:28"
+          },
+          {
+            "contract": "LockLiquidity",
+            "label": "pricePadding",
+            "type": "t_uint256",
+            "src": "LockLiquidity.sol:29"
           }
         ],
         "types": {

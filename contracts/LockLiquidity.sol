@@ -82,7 +82,7 @@ contract LockLiquidity is Initializable, OwnableUpgradeSafe {
         uint256 myYtxFee = _amount;
         // Set the initial price 
         if (ytxFeePrice == 0) {
-            ytxFeePrice = accomulatedRewards.mul(pricePadding).div(_amount).add(1e18);
+            ytxFeePrice = (accomulatedRewards.mul(pricePadding).div(_amount)).add(1e18);
         }
         myYtxFee = _amount.div(ytxFeePrice);
         totalYtxFeeMined = totalYtxFeeMined.add(myYtxFee);

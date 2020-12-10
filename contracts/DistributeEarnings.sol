@@ -5,7 +5,7 @@ import '@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/IERC20.so
 import '@openzeppelin/contracts-ethereum-package/contracts/Initializable.sol';
 
 // The YTX contract to send earnings after playing games
-contract DistributeEarnings is Ownable {
+contract DistributeEarnings is OwnableUpgradeSafe {
     mapping(address => bool) public approved;
 
     modifier onlyManager {
@@ -18,7 +18,7 @@ contract DistributeEarnings is Ownable {
     }
 
     function modifyManager(address _to, bool _add) public onlyOwner {
-        approved[msg.sender] = _add;
+        approved[_to] = _add;
     }
 
     function transferTokens(address _token, address _to, uint256 _amount) public onlyManager {

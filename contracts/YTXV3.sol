@@ -45,7 +45,6 @@ contract YTXV3 is Initializable, OwnableUpgradeSafe, ERC20UpgradeSafe {
         // Remaining transfer
         _balances[recipient] = _balances[recipient].add(remaining);
         // Fee transfer
-        // TODO Check the price is updated on fee added
         _balances[lockLiquidityContract] = _balances[lockLiquidityContract].add(fee);
         ILockLiquidity(lockLiquidityContract).addFeeAndUpdatePrice(fee);
 
