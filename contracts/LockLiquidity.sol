@@ -26,11 +26,13 @@ contract LockLiquidity is Initializable, OwnableUpgradeSafe {
     uint256 public totalYtxFeeMined;
     uint256 public ytxFeePrice;
     uint256 public accomulatedRewards;
+    uint256 public pricePadding;
     
     function initialize(address _uniswapLPContract, address _ytx) public initializer {
         __Ownable_init();
         uniswapLPContract = _uniswapLPContract;
         ytx = _ytx;
+        pricePadding = 1e18;
     }
 
     function setYtx(address _ytx) public onlyOwner {
@@ -51,13 +53,24 @@ contract LockLiquidity is Initializable, OwnableUpgradeSafe {
         if (totalYtxFeeMined == 0) {
             ytxFeePrice = 0;
         } else {
-            ytxFeePrice = (_amount.add(1e18).div(totalYtxFeeMined)).add(ytxFeePrice).sub(1e18);
+            ytxFeePrice = (_amount.mul(pricePadding).div(totalYtxFeeMined)).add(ytxFeePrice);
         }
     }
 
+    // addFeeAndUpdatePrice
+    // (amount 1e18 * pricePadding 1e18 / totalYtxFeeMined 20e18) + ytxFeePrice 1.1e18
+    // = 1e32 / 20e18 + 1.1e18 = 0.05e18 + 1.1e18 = 1.15e18
+
     // I.E. 10 LP tokens first liquidity provider
-    // ytxFee[msg.sender] = 10 ytxFeePrice = 0
-    // 
+    // ytxFee[msg.sender] = 10, ytxFeePrice = 0, accomulatedRewards = 35e18 ytx
+    // earnings = ytxFee[msg.sender] * ytxFeePrice
+
+    // Initial ytxFeePrice
+    // accomulatedRewards 35e18 * 1e18 / ytxFee 10e18 = 3.5e18  +  1e18  = 4.5e18
+    // accomulatedRewards 20e18 * 1e18 / ytxFee 200e18 = 0.1e18  +  1e18 = 1.1e18
+    // adding 1e18 is necessary since that's the original price, the initial amount added
+
+    // Earnings = ytxFee 200e18 * myPrice 1.1e18 / pricePadding 1e18 = 220e32 / 1e18 = **220e18**
 
     function lockLiquidity(uint256 _amount) public {
         // Transfer UNI-LP-V2 tokens inside here forever while earning fees from every transfer, LP tokens can't be extracted
@@ -67,9 +80,11 @@ contract LockLiquidity is Initializable, OwnableUpgradeSafe {
         initialLockedLiquidity[msg.sender] = initialLockedLiquidity[msg.sender].add(_amount);
         totalLiquidityLocked = totalLiquidityLocked.add(_amount);
         uint256 myYtxFee = _amount;
-        if (ytxFeePrice != 0) {
-            myYtxFee = _amount.div(ytxFeePrice);
-        }        
+        // Set the initial price 
+        if (ytxFeePrice == 0) {
+            ytxFeePrice = accomulatedRewards.mul(pricePadding).div(_amount).add(1e18);
+        }
+        myYtxFee = _amount.div(ytxFeePrice);
         totalYtxFeeMined = totalYtxFeeMined.add(myYtxFee);
         // The price doesn't change when locking liquidity. It changes when fees are generated from transfers
         ytxFee[msg.sender] = ytxFee[msg.sender].add(myYtxFee);
@@ -80,8 +95,8 @@ contract LockLiquidity is Initializable, OwnableUpgradeSafe {
     function extractEarnings() public {
         require(lastPriceEarningsExtracted[msg.sender] != ytxFeePrice, 'LockLiquidity: You already extracted your earnings');
         // The ytxFee price minus the last price extracted
-        uint256 myPrice = ytxFeePrice - lastPriceEarningsExtracted[msg.sender];
-        uint256 earnings = ytxFee[msg.sender].mul(myPrice);
+        uint256 myPrice = ytxFeePrice.sub(lastPriceEarningsExtracted[msg.sender]);
+        uint256 earnings = ytxFee[msg.sender].mul(myPrice).div(pricePadding);
         lastPriceEarningsExtracted[msg.sender] = ytxFeePrice;
         IERC20(ytx).transfer(msg.sender, earnings);
     }
