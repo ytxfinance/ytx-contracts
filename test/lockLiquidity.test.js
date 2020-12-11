@@ -62,15 +62,15 @@ contract('LockLiquidity', accs => {
 	// Works
 	it('should update the ytxFee price correctly after the initial price', async () => {
 		const expectedFee = 1e16 // From a 10e18 transfer, a 1% fee is .1e18
-		await addInitialLiquidityWithFee(defaultAmount, ytx, testToken, lockLiquidity,)
-		const updatedYtxFeePrice = String(await lockLiquidity.ytxFeePrice())
-		assert.ok(updatedYtxFeePrice == 1e18 + expectedFee, 'The updated ytxFeePrice is not correct')
-		assert.ok(updatedYtxFeePrice * defaultAmount == defaultAmount * (1e18 + expectedFee), 'The converted value is not correct')
+		await addInitialLiquidityWithFee(defaultAmount, ytx, testToken, lockLiquidity)
+		// Add some fee YTX tokens to distribute and see if the price changes
+		await ytx.transfer(
+			'0x7c5bAe6BC84AE74954Fd5672feb6fB31d2182EC6',
+			defaultAmount,
+		)
 
-		await addInitialLiquidityWithFee(defaultAmount, ytx, testToken, lockLiquidity,)
 		const finalUpdatedYtxFeePrice = String(await lockLiquidity.ytxFeePrice())
-		console.log('finalUpdatedYtxFeePrice', finalUpdatedYtxFeePrice)
-		assert.ok(finalUpdatedYtxFeePrice == 1e18 + expectedFee + (expectedFee/2), 'The final updated ytxFeePrice is not correct after 2 liquidity provisions and providers')
+		assert.ok(finalUpdatedYtxFeePrice == 1e18 + expectedFee * 2, 'The final updated ytxFeePrice is not correct after 2 liquidity provisions and providers')
 	})
 })
 

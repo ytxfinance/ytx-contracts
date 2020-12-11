@@ -258,9 +258,9 @@
         }
       }
     },
-    "cb400f430fdb1747d0a07d7155cae21caddecb04fe2296053df4d4c94c87a9d5": {
+    "ee364f69ad09adde025b88a6903ce69655d62114933790dd457cb2f61fd25b7d": {
       "address": "0x9FBDa871d559710256a2502A2517b794B482Db40",
-      "txHash": "0x8738dbe25c4a22e09d7719bbfa8af342cbf4634999132ffff2ebcfd4fcd15cce",
+      "txHash": "0x3ac3f47b3f8dbc55badcac782a7a07bb90eb556392901f676710ed3bf78f88b6",
       "layout": {
         "storage": [
           {
@@ -301,13 +301,7 @@
           },
           {
             "contract": "LockLiquidity",
-            "label": "initialLockedLiquidity",
-            "type": "t_mapping(t_address,t_uint256)",
-            "src": "LockLiquidity.sol:15"
-          },
-          {
-            "contract": "LockLiquidity",
-            "label": "ytxFee",
+            "label": "amountLocked",
             "type": "t_mapping(t_address,t_uint256)",
             "src": "LockLiquidity.sol:16"
           },
