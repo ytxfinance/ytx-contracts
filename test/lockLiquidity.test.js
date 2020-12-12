@@ -54,7 +54,6 @@ contract('LockLiquidity', accs => {
 		const expectedFee = 1e16 // From a 10e18 transfer, a 1% fee is .1e18
 		await addInitialLiquidityWithFee(defaultAmount, ytx, testToken, lockLiquidity,)
 		const updatedYtxFeePrice = String(await lockLiquidity.ytxFeePrice())
-
 		assert.ok(updatedYtxFeePrice == 1e18 + expectedFee, 'The updated ytxFeePrice is not correct')
 		assert.ok(updatedYtxFeePrice * defaultAmount == defaultAmount * (1e18 + expectedFee), 'The converted value is not correct')
 	})
@@ -68,9 +67,51 @@ contract('LockLiquidity', accs => {
 			'0x7c5bAe6BC84AE74954Fd5672feb6fB31d2182EC6',
 			defaultAmount,
 		)
-
 		const finalUpdatedYtxFeePrice = String(await lockLiquidity.ytxFeePrice())
 		assert.ok(finalUpdatedYtxFeePrice == 1e18 + expectedFee * 2, 'The final updated ytxFeePrice is not correct after 2 liquidity provisions and providers')
+	})
+
+	// Works
+	it('should update the ytxFee price correctly after many fee additions', async () => {
+		const expectedFee = 1e16 // From a 10e18 transfer, a 1% fee is .1e18
+		await addInitialLiquidityWithFee(defaultAmount, ytx, testToken, lockLiquidity)
+		// Add some fee YTX tokens to distribute and see if the price changes
+		for (let i = 0; i < 9; i++) {
+			await ytx.transfer(
+				'0x7c5bAe6BC84AE74954Fd5672feb6fB31d2182EC6',
+				defaultAmount,
+			)
+		}
+		const finalUpdatedYtxFeePrice = String(await lockLiquidity.ytxFeePrice())
+		assert.ok(finalUpdatedYtxFeePrice == 1e18 + expectedFee * 10, 'The final updated ytxFeePrice is not correct after 10 liquidity provisions and providers')
+	})
+
+	// Works
+	it('should update the ytxFee price correctly after many liquidity new LPs and fee ads', async () => {
+		const expectedFee = 1e16 // From a 10e18 transfer, a 1% fee is .1e18
+		let feeAdded = 0
+		for (let i = 0; i < 10; i++) {
+			// Add liqudity providers first then add fee rewards
+			await testToken.approve(lockLiquidity.address, defaultAmount)
+			await lockLiquidity.lockLiquidity(defaultAmount)
+			await ytx.transfer(
+				'0x7c5bAe6BC84AE74954Fd5672feb6fB31d2182EC6',
+				defaultAmount,
+			)
+			const finalUpdatedYtxFeePrice = String(await lockLiquidity.ytxFeePrice())
+			feeAdded += (expectedFee / (i+1))
+			assert.ok(finalUpdatedYtxFeePrice == 1e18 + feeAdded, `The fee is not correct at counter ${i+1}`)
+		}
+	})
+
+	// 1 provider    |   0.1e18 fee   |   10.1e18 ytxFeePrice
+	// 2 providers   |   0.1e18 fee / 2   |   10.15e18 ytxFeePrice  (the price got updated before the LP joined)
+	// 3 providers   |   0.1e18 fee / 3  |   10.25e18 ytxFeePrice
+	// 4 providers   |   0.1e18 fee / 4  |   10.25e18 ytxFeePrice
+
+	// TODO
+	it('should extract the right price correctly', async () => {
+
 	})
 })
 

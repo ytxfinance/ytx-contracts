@@ -66,6 +66,9 @@ contract LockLiquidity is Initializable, OwnableUpgradeSafe {
         // Set the initial price 
         if (ytxFeePrice == 0) {
             ytxFeePrice = (accomulatedRewards.mul(pricePadding).div(_amount)).add(1e18);
+            lastPriceEarningsExtracted[msg.sender] = 0;
+        } else {
+            lastPriceEarningsExtracted[msg.sender] = ytxFeePrice;
         }
         // The price doesn't change when locking liquidity. It changes when fees are generated from transfers
         amountLocked[msg.sender] = amountLocked[msg.sender].add(_amount);
@@ -74,7 +77,7 @@ contract LockLiquidity is Initializable, OwnableUpgradeSafe {
     // We check for new earnings by seeing if the price the user last extracted his earnings
     // is the same or not to determine whether he can extract new earnings or not
     function extractEarnings() public {
-        require(lastPriceEarningsExtracted[msg.sender] != ytxFeePrice, 'LockLiquidity: You already extracted your earnings');
+        require(lastPriceEarningsExtracted[msg.sender] != ytxFeePrice, 'LockLiquidity: You have already extracted your earnings');
         // The amountLocked price minus the last price extracted
         uint256 myPrice = ytxFeePrice.sub(lastPriceEarningsExtracted[msg.sender]);
         uint256 earnings = amountLocked[msg.sender].mul(myPrice).div(pricePadding);
