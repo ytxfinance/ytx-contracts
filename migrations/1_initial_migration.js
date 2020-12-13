@@ -2,18 +2,29 @@ const { deployProxy, upgradeProxy } = require('@openzeppelin/truffle-upgrades')
 const LockLiquidity = artifacts.require('LockLiquidity')
 const YTXV3 = artifacts.require('YTXV3')
 const TestToken = artifacts.require('TestToken')
-const fs = require('fs')
 
 module.exports = async deployer => {
-  // await deployProxy(TestToken, [], { deployer, initializer: 'initialize' });
-  // await deployProxy(YTXV3, [], { deployer, initializer: 'initialize' });
-  // const currentTestToken = await TestToken.deployed()
-  // const currentYtx = await YTXV3.deployed()
-  // console.log('Deployed test token', currentTestToken.address)
-  // console.log('Deployed YTX', currentYtx.address)
-  // await deployProxy(LockLiquidity, [currentTestToken.address, currentYtx.address], { deployer, initializer: 'initialize' });
-  // const lockLiquidityContract = await LockLiquidity.deployed()
-  // console.log('Deployed LockLiquidity', lockLiquidityContract.address)
-  // console.log('Executing setLockLiquidityContract...')
-  // await currentYtx.setLockLiquidityContract(lockLiquidityContract.address)
+  // await deployYTX()
+  // await deployLockLiquidity()
+  // await setLockLiquidityContract()
+}
+
+// Returns the deployed token with the address and functionality
+const deployYTX = async deployer => {
+  await deployProxy(YTXV3, [], { deployer, initializer: 'initialize' });
+  return await YTXV3.deployed()
+}
+
+const deployTestToken = async deployer => {
+  await deployProxy(TestToken, [], { deployer, initializer: 'initialize' });
+  return await TestToken.deployed()
+}
+
+const deployLockLiquidity = async (deployer, LPTokenAddress, ytxTokenAddress) => {
+  await deployProxy(LockLiquidity, [LPTokenAddress, ytxTokenAddress], { deployer, initializer: 'initialize' });
+  return await LockLiquidity.deployed()
+}
+
+const setLockLiquidityContract = async lockLiquidityAddress => {
+  await currentYtx.setLockLiquidityContract(lockLiquidityAddress)
 }

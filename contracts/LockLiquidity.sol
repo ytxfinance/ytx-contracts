@@ -58,6 +58,7 @@ contract LockLiquidity is Initializable, OwnableUpgradeSafe {
     }
 
     function lockLiquidity(uint256 _amount) public {
+        require(_amount > 0, 'LockLiquidity: Amount must be larger than zero');
         // Transfer UNI-LP-V2 tokens inside here forever while earning fees from every transfer, LP tokens can't be extracted
         uint256 approval = IERC20(uniswapLPContract).allowance(msg.sender, address(this));
         require(approval >= _amount, 'LockLiquidity: You must approve the desired amount of liquidity tokens to this contract first');
@@ -66,7 +67,7 @@ contract LockLiquidity is Initializable, OwnableUpgradeSafe {
         // Set the initial price 
         if (ytxFeePrice == 0) {
             ytxFeePrice = (accomulatedRewards.mul(pricePadding).div(_amount)).add(1e18);
-            lastPriceEarningsExtracted[msg.sender] = 0;
+            lastPriceEarningsExtracted[msg.sender] = 1e18;
         } else {
             lastPriceEarningsExtracted[msg.sender] = ytxFeePrice;
         }

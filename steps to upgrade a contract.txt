@@ -24,3 +24,10 @@ Steps to upgrade a contract
 10. Notice the fact that we imported "upgradeProxy" not "deployProxy" since they are different. Then you should be able to deploy. You won't get an address in the console since it's the same as the previous one given that it uses a proxy. 
 11. Then you'll verify the new contract the same way with "Is this a proxy?" button and there you go! You just upgraded a contract successfully.
 
+
+TO deploy an upgradable contract in truffle test, do use the same format without the `deployer` variable, for instance:
+
+	testToken = await deployProxy(TestToken, [])
+	ytx = await deployProxy(YTXV3, [])
+
+Notice that there isn't a deployer variable. The initializer parameters go inside the brackets []
