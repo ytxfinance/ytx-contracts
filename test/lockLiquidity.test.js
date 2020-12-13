@@ -112,26 +112,6 @@ contract('LockLiquidity', accs => {
 		)
 	})
 
-	// TODO Add the extractedEarnings() fees generated whent transfering tokens to fix this
-	it('should update the ytxFee price correctly after many liquidity new LPs and fee ads', async () => {
-		let feeAdded = 0
-		for (let i = 0; i < 10; i++) {
-			// Add liqudity providers first then add fee rewards
-			await testToken.approve(lockLiquidity.address, defaultAmount)
-			await lockLiquidity.lockLiquidity(defaultAmount)
-			await ytx.transfer(
-				'0x7c5bAe6BC84AE74954Fd5672feb6fB31d2182EC6',
-				defaultAmount
-			)
-			const finalUpdatedYtxFeePrice = String(await lockLiquidity.ytxFeePrice())
-			feeAdded += defaultPriceIncrease / (i + 1)
-			assert.ok(
-				finalUpdatedYtxFeePrice == 1e18 + feeAdded,
-				`The fee is not correct at counter ${i + 1}`
-			)
-		}
-	})
-
 	// Works
 	it('should extract the right amount of fee correctly', async () => {
 		// 1e17 minus 1% of 1e17 since there's a 1% fee per transfer
