@@ -104,7 +104,7 @@ contract LockLiquidity is Initializable, OwnableUpgradeSafe {
     // he must extract all the LPs for simplicity and security purposes
     function extractLiquidity() public {
         require(amountLocked[msg.sender] > 0, 'You must have locked liquidity provider tokens to extract them');
-        require(now - lockingTime[msg.sender] >= 365 days, 'You must wait the specified locking time to extract your liquidity provider tokens');
+        require(now - lockingTime[msg.sender] >= timeToExitLiquidity, 'You must wait the specified locking time to extract your liquidity provider tokens');
         // Extract earnings in case there are some
         if (lastPriceEarningsExtracted[msg.sender] != 0 && lastPriceEarningsExtracted[msg.sender] != ytxFeePrice) {
             extractEarnings();

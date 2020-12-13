@@ -164,6 +164,18 @@ contract('LockLiquidity', accs => {
 			"The final balance isn't correct"
 		)
 	})
+
+	it.only('should extract the liquidity after locking it successfully', async () => {
+		await lockLiquidity.setTimeToExitLiquidity(0); // Make sure to remove the 365 days wait
+		const initialLPTokenBalance = await testToken.balanceOf(accs[0])
+		// Lock some tokens
+		await testToken.approve(lockLiquidity.address, defaultAmount)
+		await lockLiquidity.lockLiquidity(defaultAmount)
+		// Extract them
+		await lockLiquidity.extractLiquidity()
+		const finalLPTokenBalance = await testToken.balanceOf(accs[0])
+		console.log('Initial', initialLPTokenBalance, 'Final', finalLPTokenBalance)
+	})
 })
 
 const addInitialLiquidityWithFee = async (
