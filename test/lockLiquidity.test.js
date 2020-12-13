@@ -51,7 +51,7 @@ contract('LockLiquidity', accs => {
 	})
 
 	// Works
-	it.only('should setup the initial ytxFeePrice', async () => {
+	it('should setup the initial ytxFeePrice', async () => {
 		await addInitialLiquidityWithFee(
 			defaultAmount,
 			ytx,
