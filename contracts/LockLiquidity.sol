@@ -55,13 +55,13 @@ contract LockLiquidity is Initializable, OwnableUpgradeSafe {
     /// Price is = (feeIn / totalYTXFeeDistributed) + currentPrice
     /// padded with 18 zeroes that get removed after the calculations
     /// if there are no locked LPs, the price is 0
-    function addFeeAndUpdatePrice(uint256 _amount) public {
+    function addFeeAndUpdatePrice(uint256 _feeIn) public {
         require(msg.sender == ytx, 'LockLiquidity: Only the YTX contract can execute this function');
-        accomulatedRewards = accomulatedRewards.add(_amount);
+        accomulatedRewards = accomulatedRewards.add(_feeIn);
         if (totalLiquidityLocked == 0) {
             ytxFeePrice = 0;
         } else {
-            ytxFeePrice = (_amount.mul(pricePadding).div(totalLiquidityLocked)).add(ytxFeePrice);
+            ytxFeePrice = (_feeIn.mul(pricePadding).div(totalLiquidityLocked)).add(ytxFeePrice);
         }
     }
 

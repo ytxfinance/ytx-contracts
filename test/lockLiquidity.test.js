@@ -4,16 +4,18 @@ const LockLiquidity = artifacts.require('LockLiquidity')
 const YTXV3 = artifacts.require('YTXV3')
 const TestToken = artifacts.require('TestToken')
 let testToken
+let gameTreasury
 let ytx
 let lockLiquidity
 
 contract('LockLiquidity', accs => {
 	const defaultAmount = BigNumber(1e19)
-	const defaultPriceIncrease = BigNumber(1e16)
+	const defaultPriceIncrease = BigNumber(9e15)
 
 	beforeEach(async () => {
 		testToken = await deployProxy(TestToken, [])
-		ytx = await deployProxy(YTXV3, [])
+		gameTreasury = await deployProxy(TestToken, [])
+		ytx = await deployProxy(YTXV3, [gameTreasury.address])
 		lockLiquidity = await deployProxy(LockLiquidity, [
 			testToken.address,
 			ytx.address,
@@ -114,9 +116,9 @@ contract('LockLiquidity', accs => {
 
 	// Works
 	it('should extract the right amount of fee correctly', async () => {
-		// 1e17 minus 1% of 1e17 since there's a 1% fee per transfer
-		const expectedEarnings = 1e17 - 0.01e17
-		const feeInsideContract = 1e17
+		// 1e17 minus 1% of 1e17 since there's a 1% fee per transfer when giving rewards to users
+		const expectedEarnings = 9e16 - 0.09e16
+		const feeInsideContract = 9e16
 		// 1. Send some tokens to account 2 to use a different account
 		await testToken.transfer(accs[1], defaultAmount, { from: accs[0] })
 		// 2. Lock LP tokens
