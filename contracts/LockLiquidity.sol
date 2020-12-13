@@ -16,8 +16,10 @@ contract LockLiquidity is Initializable, OwnableUpgradeSafe {
     mapping (address => uint256) public amountLocked;
     // The price when you extracted your earnings so we can whether you got new earnings or not
     mapping (address => uint256) public lastPriceEarningsExtracted;
+    // When the user started locking his LP tokens
+    mapping (address => uint256) public lockingTime;
     // The uniswap LP token contract
-    address public uniswapLPContract;
+    address public liquidityProviderToken;
     // The YTX token
     address public ytx;
     // How many LP tokens are locked
@@ -27,10 +29,11 @@ contract LockLiquidity is Initializable, OwnableUpgradeSafe {
     uint256 public ytxFeePrice;
     uint256 public accomulatedRewards;
     uint256 public pricePadding;
+    uint256 public timeToExitLiquidity = 365 days;
     
-    function initialize(address _uniswapLPContract, address _ytx) public initializer {
+    function initialize(address _liquidityProviderToken, address _ytx) public initializer {
         __Ownable_init();
-        uniswapLPContract = _uniswapLPContract;
+        liquidityProviderToken = _liquidityProviderToken;
         ytx = _ytx;
         pricePadding = 1e18;
     }
@@ -39,8 +42,12 @@ contract LockLiquidity is Initializable, OwnableUpgradeSafe {
         ytx = _ytx;
     }
 
-    function setUniswapLPContract(address _uniswapLPContract) public onlyOwner {
-        uniswapLPContract = _uniswapLPContract;
+    function setLiquidityProviderToken(address _liquidityProviderToken) public onlyOwner {
+        liquidityProviderToken = _liquidityProviderToken;
+    }
+
+    function setTimeToExitLiquidity(uint256 _time) public onlyOwner {
+        timeToExitLiquidity = _time;
     }
 
     /// @notice When fee is added, the price is increased
@@ -60,10 +67,14 @@ contract LockLiquidity is Initializable, OwnableUpgradeSafe {
     function lockLiquidity(uint256 _amount) public {
         require(_amount > 0, 'LockLiquidity: Amount must be larger than zero');
         // Transfer UNI-LP-V2 tokens inside here forever while earning fees from every transfer, LP tokens can't be extracted
-        uint256 approval = IERC20(uniswapLPContract).allowance(msg.sender, address(this));
+        uint256 approval = IERC20(liquidityProviderToken).allowance(msg.sender, address(this));
         require(approval >= _amount, 'LockLiquidity: You must approve the desired amount of liquidity tokens to this contract first');
-        IERC20(uniswapLPContract).transferFrom(msg.sender, address(this), _amount);
+        IERC20(liquidityProviderToken).transferFrom(msg.sender, address(this), _amount);
         totalLiquidityLocked = totalLiquidityLocked.add(_amount);
+        // Extract earnings in case the user is not a new Locked LP
+        if (lastPriceEarningsExtracted[msg.sender] != 0 && lastPriceEarningsExtracted[msg.sender] != ytxFeePrice) {
+            extractEarnings();
+        }
         // Set the initial price 
         if (ytxFeePrice == 0) {
             ytxFeePrice = (accomulatedRewards.mul(pricePadding).div(_amount)).add(1e18);
@@ -73,6 +84,8 @@ contract LockLiquidity is Initializable, OwnableUpgradeSafe {
         }
         // The price doesn't change when locking liquidity. It changes when fees are generated from transfers
         amountLocked[msg.sender] = amountLocked[msg.sender].add(_amount);
+        // Notice that the locking time is reset when new liquidity is added
+        lockingTime[msg.sender] = now;
     }
 
     // We check for new earnings by seeing if the price the user last extracted his earnings
@@ -85,6 +98,23 @@ contract LockLiquidity is Initializable, OwnableUpgradeSafe {
         lastPriceEarningsExtracted[msg.sender] = ytxFeePrice;
         accomulatedRewards = accomulatedRewards.sub(earnings);
         IERC20(ytx).transfer(msg.sender, earnings);
+    }
+
+    // The user must lock the liquidity for 1 year and only then can extract his Locked LP tokens
+    // he must extract all the LPs for simplicity and security purposes
+    function extractLiquidity() public {
+        require(amountLocked[msg.sender] > 0, 'You must have locked liquidity provider tokens to extract them');
+        require(now - lockingTime[msg.sender] >= 365 days, 'You must wait the specified locking time to extract your liquidity provider tokens');
+        // Extract earnings in case there are some
+        if (lastPriceEarningsExtracted[msg.sender] != 0 && lastPriceEarningsExtracted[msg.sender] != ytxFeePrice) {
+            extractEarnings();
+        }
+        uint256 locked = amountLocked[msg.sender];
+        amountLocked[msg.sender] = 0;
+        lockingTime[msg.sender] = now;
+        lastPriceEarningsExtracted[msg.sender] = 0;
+        totalLiquidityLocked = totalLiquidityLocked.sub(locked);
+        IERC20(liquidityProviderToken).transfer(msg.sender, locked);
     }
 
     function getAmountLocked(address _user) public view returns (uint256) {
