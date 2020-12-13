@@ -258,9 +258,9 @@
         }
       }
     },
-    "53faaa05e9206f82bf6d1ec1a6bcbf2a2846c6d0209783195f6cbba6e8106828": {
+    "adcabef5aeee660bfb3c06b594eb342e3939b4cfb11bc08fc1f319bb2c8f5107": {
       "address": "0x9FBDa871d559710256a2502A2517b794B482Db40",
-      "txHash": "0x4478b1501f100bb8cb699a5dcbdd157f342563e7449a035d6def8b7d3a64e807",
+      "txHash": "0x8145d6d9579193d825bcd6da6dff07017ce828a087bb4946d4250e7c6d45ba33",
       "layout": {
         "storage": [
           {
@@ -313,45 +313,57 @@
           },
           {
             "contract": "LockLiquidity",
-            "label": "uniswapLPContract",
-            "type": "t_address",
+            "label": "lockingTime",
+            "type": "t_mapping(t_address,t_uint256)",
             "src": "LockLiquidity.sol:20"
           },
           {
             "contract": "LockLiquidity",
-            "label": "ytx",
+            "label": "liquidityProviderToken",
             "type": "t_address",
             "src": "LockLiquidity.sol:22"
           },
           {
             "contract": "LockLiquidity",
-            "label": "totalLiquidityLocked",
-            "type": "t_uint256",
+            "label": "ytx",
+            "type": "t_address",
             "src": "LockLiquidity.sol:24"
           },
           {
             "contract": "LockLiquidity",
-            "label": "totalYtxFeeMined",
+            "label": "totalLiquidityLocked",
             "type": "t_uint256",
             "src": "LockLiquidity.sol:26"
           },
           {
             "contract": "LockLiquidity",
-            "label": "ytxFeePrice",
-            "type": "t_uint256",
-            "src": "LockLiquidity.sol:27"
-          },
-          {
-            "contract": "LockLiquidity",
-            "label": "accomulatedRewards",
+            "label": "totalYtxFeeMined",
             "type": "t_uint256",
             "src": "LockLiquidity.sol:28"
           },
           {
             "contract": "LockLiquidity",
-            "label": "pricePadding",
+            "label": "ytxFeePrice",
             "type": "t_uint256",
             "src": "LockLiquidity.sol:29"
+          },
+          {
+            "contract": "LockLiquidity",
+            "label": "accomulatedRewards",
+            "type": "t_uint256",
+            "src": "LockLiquidity.sol:30"
+          },
+          {
+            "contract": "LockLiquidity",
+            "label": "pricePadding",
+            "type": "t_uint256",
+            "src": "LockLiquidity.sol:31"
+          },
+          {
+            "contract": "LockLiquidity",
+            "label": "timeToExitLiquidity",
+            "type": "t_uint256",
+            "src": "LockLiquidity.sol:32"
           }
         ],
         "types": {

@@ -29,13 +29,14 @@ contract LockLiquidity is Initializable, OwnableUpgradeSafe {
     uint256 public ytxFeePrice;
     uint256 public accomulatedRewards;
     uint256 public pricePadding;
-    uint256 public timeToExitLiquidity = 365 days;
+    uint256 public timeToExitLiquidity;
     
     function initialize(address _liquidityProviderToken, address _ytx) public initializer {
         __Ownable_init();
         liquidityProviderToken = _liquidityProviderToken;
         ytx = _ytx;
         pricePadding = 1e18;
+        timeToExitLiquidity = 365 days;
     }
 
     function setYtx(address _ytx) public onlyOwner {

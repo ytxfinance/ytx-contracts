@@ -112,7 +112,7 @@ contract('LockLiquidity', accs => {
 		)
 	})
 
-	// Works
+	// TODO Add the extractedEarnings() fees generated whent transfering tokens to fix this
 	it('should update the ytxFee price correctly after many liquidity new LPs and fee ads', async () => {
 		let feeAdded = 0
 		for (let i = 0; i < 10; i++) {
@@ -165,16 +165,33 @@ contract('LockLiquidity', accs => {
 		)
 	})
 
-	it.only('should extract the liquidity after locking it successfully', async () => {
+	// Works
+	it('should extract the liquidity after locking it successfully', async () => {
 		await lockLiquidity.setTimeToExitLiquidity(0); // Make sure to remove the 365 days wait
 		const initialLPTokenBalance = await testToken.balanceOf(accs[0])
 		// Lock some tokens
 		await testToken.approve(lockLiquidity.address, defaultAmount)
 		await lockLiquidity.lockLiquidity(defaultAmount)
+		const midLPTokenBalance = await testToken.balanceOf(accs[0])
+		assert.ok(midLPTokenBalance == initialLPTokenBalance - defaultAmount, 'The LP tokens should be transfered when locking liquidity')
 		// Extract them
 		await lockLiquidity.extractLiquidity()
 		const finalLPTokenBalance = await testToken.balanceOf(accs[0])
-		console.log('Initial', initialLPTokenBalance, 'Final', finalLPTokenBalance)
+		assert.ok(BigNumber(initialLPTokenBalance).isEqualTo(finalLPTokenBalance), 'The LP tokens should be extracted successfully')
+	})
+
+	// Works
+	it('should not allow you to extract your liquidity before 365 days', async () => {
+		try {
+			// Lock some tokens
+			await testToken.approve(lockLiquidity.address, defaultAmount)
+			await lockLiquidity.lockLiquidity(defaultAmount)
+			// Extract them
+			await lockLiquidity.extractLiquidity()
+			assert.ok(false, "a) The test should fail since it shouldn't allow you to extract liquidity before 365 days")
+		} catch (e) {
+			assert.ok(true, "b) The test should fail since it shouldn't allow you to extract liquidity before 365 days")
+		}
 	})
 })
 
