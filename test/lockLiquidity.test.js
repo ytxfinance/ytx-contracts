@@ -3,7 +3,7 @@ const { deployProxy, upgradeProxy } = require('@openzeppelin/truffle-upgrades')
 const LockLiquidity = artifacts.require('LockLiquidity')
 const YTXV3 = artifacts.require('YTXV3')
 const TestToken = artifacts.require('TestToken')
-let testToken
+let testToken // LPToken from uniswap
 let gameTreasury
 let ytx
 let lockLiquidity

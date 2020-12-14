@@ -15,6 +15,7 @@ interface IYFS {
 contract NFTManager is Initializable, OwnableUpgradeSafe, ERC721UpgradeSafe {
     using SafeMath for uint256;
 
+    // TODO Replace this struct with an array with those elements and a mapping
     struct Blueprint {
         string tokenURI;
         uint256 mintMax;
@@ -63,13 +64,17 @@ contract NFTManager is Initializable, OwnableUpgradeSafe, ERC721UpgradeSafe {
         amountStaked[msg.sender] = amountStaked[msg.sender].add(_amount);
     }
 
+    function receiveYFS() public {
+        uint256 yfsGenerated = amountStaked[msg.sender].mul(timeStaked[msg.sender].div(oneDayInBlocks));
+        timeStaked[msg.sender] = block.number;
+        IYFS(yfs).mint(msg.sender, yfsGenerated);
+    }
+
     // Unstake YTX tokens and receive YFS tokens tradable for NFTs
     function unstakeYTXAndReceiveYFS(uint256 _amount) public {
         require(_amount < amountStaked[msg.sender], "NFTManager: You can't unstake more than your current stake");
-        uint256 yfsGenerated = amountStaked[msg.sender].mul(timeStaked[msg.sender]).div(oneDayInBlocks);
-        timeStaked[msg.sender] = block.number;
+        receiveYFS();
         amountStaked[msg.sender] = amountStaked[msg.sender].sub(_amount);
-        IYFS(yfs).mint(msg.sender, yfsGenerated);
         IERC20(ytx).transfer(msg.sender, _amount);
     }
 
@@ -83,7 +88,7 @@ contract NFTManager is Initializable, OwnableUpgradeSafe, ERC721UpgradeSafe {
     // NOTE: remember that the tokenURI most not have the baseURI. For instance:
     // - BaseURI is https://examplenft.com/
     // - TokenURI must be "token-1" or whatever without the BaseURI
-    // To create the resulting https://exampleNFT
+    // To create the resulting https://exampleNFT.com/token-1
     function safeMint(string memory _tokenURI) public {
         string memory emptyString = "";
         // Check that this tokenURI exists
@@ -98,8 +103,8 @@ contract NFTManager is Initializable, OwnableUpgradeSafe, ERC721UpgradeSafe {
         IERC20(ytx).transferFrom(msg.sender, address(this), blueprints[_tokenURI].ytxCost);
         IERC20(yfs).transferFrom(msg.sender, address(this), blueprints[_tokenURI].yfsCost);
 
-        blueprints[_tokenURI].currentMint++;
-        lastId++;
+        blueprints[_tokenURI].currentMint = blueprints[_tokenURI].currentMint.add(1);
+        lastId = lastId.add(1);
         _safeMint(msg.sender, lastId, "");
         // The token URI determines which NFT this is
         _setTokenURI(lastId, _tokenURI);
