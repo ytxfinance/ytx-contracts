@@ -25,6 +25,8 @@ contract NFTManager is Initializable, OwnableUpgradeSafe, ERC721UpgradeSafe {
     // [3] uint256 yfsCost;
     mapping (string => uint256[4]) public blueprints;
     mapping (string => bool) public blueprintExists;
+    // Token ID -> tokenURI without baseURI
+    mapping (uint256 => string) public myTokenURI;
     string[] public tokenURIs;
     uint256[] public mintedTokenIds;
     uint256 public lastId;
@@ -68,6 +70,8 @@ contract NFTManager is Initializable, OwnableUpgradeSafe, ERC721UpgradeSafe {
         uint256 allowance = IERC20(ytx).allowance(msg.sender, address(this));
         require(allowance >= _amount, 'NFTManager: You have to approve the required token amount to stake');
         IERC20(ytx).transferFrom(msg.sender, address(this), _amount);
+        // Apply 1% fee from the transfer
+        _amount = _amount.mul(99).div(100);
         timeStaked[msg.sender] = block.number;
         amountStaked[msg.sender] = amountStaked[msg.sender].add(_amount);
     }
@@ -109,9 +113,25 @@ contract NFTManager is Initializable, OwnableUpgradeSafe, ERC721UpgradeSafe {
         blueprints[_tokenURI][1] = blueprints[_tokenURI][1].add(1);
         lastId = lastId.add(1);
         mintedTokenIds.push(lastId);
+        myTokenURI[lastId] = _tokenURI;
         // The token URI determines which NFT this is
         _safeMint(msg.sender, lastId, "");
         _setTokenURI(lastId, _tokenURI);
+    }
+
+    /// @notice To break a card and receive the YTX inside, which is inside this contract
+    /// @param _id The token id of the card to burn and extract the YTX
+    function breakCard(uint256 _id) public {
+        require(_exists(_id), "The token doesn't exist with that tokenId");
+        address owner = ownerOf(_id);
+        require(owner != address(0), "The token doesn't have an owner");
+        require(owner == msg.sender, 'You must be the owner of this card to break it');
+        // Don't use the function tokenURI() because it combines the baseURI too
+        string memory userURI = myTokenURI[_id];
+        uint256[4] memory blueprint = blueprints[userURI];
+        _burn(_id);
+        // Consider the 1% cost when minting the card since the contract should not have more than that inside
+        IERC20(ytx).transfer(msg.sender, blueprint[2].mul(99).div(100));
     }
 
     function extractTokensIfStuck(address _token, uint256 _amount) public onlyOwner {

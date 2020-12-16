@@ -42,8 +42,9 @@ contract('NFTManager', accs => {
 		await ytx.approve(managerInstance.address, defaultAmount)
 		await managerInstance.stakeYTX(defaultAmount)
 		const amount = await managerInstance.amountStaked(accs[0])
+		const expectedAmount = defaultAmount.multipliedBy(99).dividedBy(100)
 		assert.ok(
-			BigNumber(amount).isEqualTo(defaultAmount),
+			BigNumber(amount).isEqualTo(expectedAmount),
 			'The staked YTX should be correct'
 		)
 	})
@@ -56,15 +57,15 @@ contract('NFTManager', accs => {
 			await managerInstance.stakeYTX(defaultAmount)
 		}
 		const amount = await managerInstance.amountStaked(accs[0])
+		const expectedAmount = defaultAmount.multipliedBy(99).dividedBy(100).multipliedBy(times)
 		assert.ok(
-			BigNumber(amount).isEqualTo(defaultAmount * times),
+			BigNumber(amount).isEqualTo(expectedAmount),
 			'The staked YTX should be correct'
 		)
 	})
 
 	// Works
 	it('should generate the right amount of YFS tokens after staking for 10% of a day in blocks', async () => {
-		const yfsBalance = await yfs.balanceOf(accs[0])
 		const expectedBalance = 1e18
 		await ytx.approve(managerInstance.address, defaultAmount)
 		await managerInstance.stakeYTX(defaultAmount)
@@ -74,7 +75,7 @@ contract('NFTManager', accs => {
 		}
 		await managerInstance.receiveYFS()
 		const finalYfsBalance = await yfs.balanceOf(accs[0])
-		assert.ok(BigNumber(expectedBalance).isEqualTo(finalYfsBalance), "It should've generated 1e18 YFS after 10% of 1 day")
+		assert.ok(BigNumber(expectedBalance).multipliedBy(99).dividedBy(100).isEqualTo(finalYfsBalance), "It should've generated 1e18 YFS after 10% of 1 day")
 	})
 
 	// Works
@@ -83,7 +84,7 @@ contract('NFTManager', accs => {
 	it('should unstake YTX and receive YFS correctly', async () => {
 		// function unstakeYTXAndReceiveYFS(uint256 _amount) public
 		const balance = await ytx.balanceOf(accs[0])
-		const expectedYfs = 1e17
+		const expectedYfs = .99e17
 		const amountAfterFee = BigNumber(defaultAmount).multipliedBy(99).dividedBy(100)
 		// Two times 1% fee
 		const expectedFinalAfterFee = BigNumber(defaultAmount).multipliedBy(99).dividedBy(100).multipliedBy(99).dividedBy(100)
@@ -125,7 +126,7 @@ contract('NFTManager', accs => {
 		const tokenUri = 'example-1'
 		const max = 1000
 		const ytxCost = BigNumber(10e18)
-		const yfsCost = BigNumber(1e18)
+		const yfsCost = BigNumber(.99e18)
 		await managerInstance.createBlueprint(tokenUri, max, ytxCost, yfsCost)
 		// 2. Stake YTX
 		await ytx.approve(managerInstance.address, defaultAmount)
@@ -155,7 +156,7 @@ contract('NFTManager', accs => {
 		const tokenUri = 'example-1'
 		const max = 10
 		const ytxCost = BigNumber(10e18)
-		const yfsCost = BigNumber(0.1e18)
+		const yfsCost = BigNumber(0.099e18) // .99e18 is how much you stake when staking 10e18
 		await managerInstance.createBlueprint(tokenUri, max, ytxCost, yfsCost)
 		// 2. Stake YTX
 		await ytx.approve(managerInstance.address, defaultAmount)
@@ -182,7 +183,7 @@ contract('NFTManager', accs => {
 		const tokenUri = 'example-1'
 		const max = 10
 		const ytxCost = BigNumber(10e18)
-		const yfsCost = BigNumber(0.1e18)
+		const yfsCost = BigNumber(0.099e18)
 		await managerInstance.createBlueprint(tokenUri, max, ytxCost, yfsCost)
 		// 2. Stake YTX
 		await ytx.approve(managerInstance.address, defaultAmount)
@@ -204,6 +205,90 @@ contract('NFTManager', accs => {
 			assert.ok(false, "a) It shouldn't allow you to mint more times than the max")
 		} catch (e) {
 			assert.ok(true, "b) It shouldn't allow you to mint more times than the max")
+		}
+	})
+
+	// Works
+	it('should allow you to break a card you own and receive the YTX paid', async () => {
+		// breakCard()
+		let midBalance
+		let finalBalance
+		// 1. Generate a blueprint for 1 YFS cost
+		const tokenUri = 'example-1'
+		const max = 1000
+		const ytxCost = BigNumber(10e18)
+		const yfsCost = BigNumber(.99e18)
+		await managerInstance.createBlueprint(tokenUri, max, ytxCost, yfsCost)
+		// 2. Stake YTX
+		await ytx.approve(managerInstance.address, defaultAmount)
+		await managerInstance.stakeYTX(defaultAmount)
+		// 3. Allow 10% of a day to pass (649 blocks) to generate enough YFS 
+		// although we gotta give it 1 more to generate enough
+		for (let i = 0; i < 649; i++) {
+			await utils.advanceBlock()
+		}
+		// 4. Extract the YFS
+		const amountAfterFee = defaultAmount.multipliedBy(99).dividedBy(100)
+		await managerInstance.unstakeYTXAndReceiveYFS(amountAfterFee)
+		// 5. Mint a 1 YFS cost card by allowing YTX and YFS to the contract
+		await ytx.approve(managerInstance.address, defaultAmount)
+		await yfs.approve(managerInstance.address, BigNumber(defaultAmount).dividedBy(10)) // 1 YFS
+		// 6. Mint the card
+		await managerInstance.safeMint(tokenUri)
+		midBalance = await ytx.balanceOf(accs[0])
+		const tokenId = await managerInstance.mintedTokenIds(0)
+		// The user gets 98.01 YTX after 2x 1% fees
+		await managerInstance.breakCard(tokenId)
+		finalBalance = await ytx.balanceOf(accs[0])
+		const twoOnePercents = defaultAmount.multipliedBy(99).dividedBy(100).multipliedBy(99).dividedBy(100)
+		assert.ok(BigNumber(midBalance).plus(twoOnePercents).isEqualTo(finalBalance), 'The final balance should be correct')
+	})
+
+	// Works
+	it("shouldn't allow you to break a card you don't own", async () => {
+		// breakCard()
+		let midBalance
+		let finalBalance
+		// 1. Generate a blueprint for 1 YFS cost
+		const tokenUri = 'example-1'
+		const max = 1000
+		const ytxCost = BigNumber(10e18)
+		const yfsCost = BigNumber(.99e18)
+		await managerInstance.createBlueprint(tokenUri, max, ytxCost, yfsCost)
+		// 2. Stake YTX
+		await ytx.approve(managerInstance.address, defaultAmount)
+		await managerInstance.stakeYTX(defaultAmount)
+		// 3. Allow 10% of a day to pass (649 blocks) to generate enough YFS 
+		// although we gotta give it 1 more to generate enough
+		for (let i = 0; i < 649; i++) {
+			await utils.advanceBlock()
+		}
+		// 4. Extract the YFS
+		const amountAfterFee = defaultAmount.multipliedBy(99).dividedBy(100)
+		await managerInstance.unstakeYTXAndReceiveYFS(amountAfterFee)
+		// 5. Mint a 1 YFS cost card by allowing YTX and YFS to the contract
+		await ytx.approve(managerInstance.address, defaultAmount)
+		await yfs.approve(managerInstance.address, BigNumber(defaultAmount).dividedBy(10)) // 1 YFS
+		// 6. Mint the card
+		await managerInstance.safeMint(tokenUri)
+		midBalance = await ytx.balanceOf(accs[0])
+		const tokenId = await managerInstance.mintedTokenIds(0)
+
+		try {
+			await managerInstance.breakCard(tokenId, { from: accs[0] })
+			assert.ok(false, "The break card function should throw when trying to break a card you don't own")
+		} catch (e) {
+			assert.ok(true)
+		}
+	})
+
+	// Works
+	it("shouldn't allow you to break a card that hasn't been minted already", async () => {
+		try {
+			await managerInstance.breakCard(1, { from: accs[0] })
+			assert.ok(false, "The break card function should throw when trying to break a card you don't own")
+		} catch (e) {
+			assert.ok(true)
 		}
 	})
 })
