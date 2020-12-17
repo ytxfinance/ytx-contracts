@@ -10,7 +10,6 @@ interface IYFS {
     function burn(address _to, uint256 _amount) external;
 }
 
-// TODO Be able to break NFTs into their YTX tokens
 contract NFTManager is Initializable, OwnableUpgradeSafe, ERC721UpgradeSafe {
     using SafeMath for uint256;
     
