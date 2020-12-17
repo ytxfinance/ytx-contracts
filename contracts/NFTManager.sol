@@ -128,10 +128,12 @@ contract NFTManager is Initializable, OwnableUpgradeSafe, ERC721UpgradeSafe {
         require(owner == msg.sender, 'You must be the owner of this card to break it');
         // Don't use the function tokenURI() because it combines the baseURI too
         string memory userURI = myTokenURI[_id];
-        uint256[4] memory blueprint = blueprints[userURI];
+        uint256[4] storage blueprint = blueprints[userURI];
         _burn(_id);
         // Consider the 1% cost when minting the card since the contract should not have more than that inside
         IERC20(ytx).transfer(msg.sender, blueprint[2].mul(99).div(100));
+        // Make sure to increase the supply again
+        blueprint[1] = blueprint[1].sub(1);
     }
 
     function extractTokensIfStuck(address _token, uint256 _amount) public onlyOwner {
