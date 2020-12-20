@@ -1,0 +1,1 @@
+sol-merger contracts/Sample.sol && cat contracts/Sample_merged.sol | pbcopy && rm contracts/Sample_merged.sol
