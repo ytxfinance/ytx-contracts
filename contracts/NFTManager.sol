@@ -1,4 +1,5 @@
 pragma solidity =0.6.2;
+pragma experimental ABIEncoderV2;
 
 import '@openzeppelin/contracts-ethereum-package/contracts/access/Ownable.sol';
 import '@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/IERC20.sol';
@@ -75,12 +76,23 @@ contract NFTManager is Initializable, OwnableUpgradeSafe, ERC721UpgradeSafe {
         amountStaked[msg.sender] = amountStaked[msg.sender].add(_amount);
     }
 
+    /// @notice this is the reason we need abiencoder v2 to return the string memory
+    function getTokenURIs() public view returns (string[] memory) {
+        return tokenURIs;
+    }
+
     function receiveYFS() public {
         require(amountStaked[msg.sender] > 0, 'You must have YTX staked to receive YFS');
-        uint256 blocksPassed = block.number.sub(timeStaked[msg.sender]);
-        uint256 yfsGenerated = amountStaked[msg.sender].mul(blocksPassed).div(oneDayInBlocks);
+        uint256 yfsGenerated = getGeneratedYFS();
         timeStaked[msg.sender] = block.number;
         IYFS(yfs).mint(msg.sender, yfsGenerated);
+    }
+
+    /// @notice Returns the generated YFS after staking YTX but doesn't send them
+    function getGeneratedYFS() public view returns(uint256) {
+        uint256 blocksPassed = block.number.sub(timeStaked[msg.sender]);
+        uint256 yfsGenerated = amountStaked[msg.sender].mul(blocksPassed).div(oneDayInBlocks);
+        return yfsGenerated;
     }
 
     // Unstake YTX tokens and receive YFS tokens tradable for NFTs
